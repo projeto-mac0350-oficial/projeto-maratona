@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Roadworks - Solução</title>
+
+    <link rel="stylesheet" href="/static/solucao.css">
+</head>
+
+
+<body>
+
+<div class="container">
+    <link rel="stylesheet" href="/static/solucao.css">
+    <h1 class="problem-title">Solução - Roadworks</h1>
+
+    <!-- ENUNCIADO -->
+    <section class="section">
+
+        <h2>Enunciado</h2>
+
+        <div class="statement">
+
+            <p>
+                In an under-construction village, <strong>n</strong> houses have been built in a row
+                numbered from <strong>1</strong> to <strong>n</strong>.
+                House <strong>i</strong> has hospitality <strong>h<sub>i</sub></strong>.
+            </p>
+
+            <p>
+                The village has <strong>n−1</strong> roads, where road <strong>i</strong> connects
+                houses <strong>i</strong> and <strong>i+1</strong> and will be built on day
+                <strong>d<sub>i</sub></strong>. Initially, no roads are built.
+            </p>
+
+            <p>
+                You start at house <strong>x</strong> and will stay in the village from day
+                <strong>1</strong> to day <strong>k</strong>, initially with a satisfaction of
+                <strong>0</strong>.
+            </p>
+
+            <p>
+                On day <strong>s</strong>, the following happens in order:
+            </p>
+
+            <ol>
+                <li>
+                    All roads <strong>i</strong> with
+                    <strong>d<sub>i</sub> = s</strong> are built.
+                </li>
+
+                <li>
+                    You may move to an adjacent house, if the road to it has been built,
+                    or stay at your current house.
+                </li>
+
+                <li>
+                    Your satisfaction increases by
+                    <strong>h<sub>j</sub></strong>, where <strong>j</strong> is the house you are
+                    currently at.
+                </li>
+            </ol>
+
+            <p>
+                Find the maximum satisfaction you can achieve after
+                <strong>k</strong> days.
+            </p>
+
+        </div>
+
+        <!-- LINK -->
+        <div class="info-box">
+            <strong>🔗 Submeter:</strong>
+            <a href="https://codeforces.com/problemset/problem/2229/G" target="_blank">
+                Problema no Codeforces
+            </a>
+        </div>
+
+    </section>
+
+    <!-- SOLUÇÃO -->
+    <section class="section">
+
+        <div class="section-header">
+            <h2>Solução Comentada</h2>
+
+            <button class="toggle-btn" onclick="toggleSection(this)">
+                mostrar
+            </button>
+        </div>
+
+        <div class="content hidden">
+            <div class="solution">
+
+                <p>
+                Observe que as estradas são construídas ao longo do tempo.
+                Em cada instante existe um intervalo contínuo de casas que pode ser alcançado.
+                </p>
+
+                <p>
+                    A estratégia consiste em manter a região acessível e determinar
+                    qual casa produz a melhor satisfação possível para os dias restantes.
+                </p>
+
+                <p>
+                    Utilizando estruturas adequadas conseguimos atualizar o intervalo
+                    e responder consultas de máximo de forma eficiente.
+                </p>
+
+            </div>
+        </div>
+
+    </section>
+
+    <!-- IMPLEMENTAÇÃO -->
+    <section class="section">
+
+        <div class="section-header">
+            <h2>Implementação</h2>
+
+            <button class="toggle-btn" onclick="toggleSection(this)">
+                mostrar
+            </button>
+        </div>
+
+        <div class="content hidden">
+            <pre class="code-block"><code>
+#include &lt;bits/stdc++.h&gt;
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    return 0;
+}
+            </code></pre>
+        </div>
+
+    </section>
+
+</div>
+
+<script>
+function toggleSection(btn){
+    const section = btn.closest(".section");
+    const content = section.querySelector(".content");
+
+    content.classList.toggle("hidden");
+
+    btn.textContent = content.classList.contains("hidden")
+        ? "mostrar"
+        : "esconder";
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Busca Binária</title>
+
+    <link rel="stylesheet" href="/static/base.css">
+    <link rel="stylesheet" href="/static/conteudo.css">
+</head>
+
+<body>
+
+<div class="bb">
+
+    <!-- TÍTULO -->
+    <h1 class="title">Busca Binária</h1>
+
+    <!-- DESCRIÇÃO -->
+    <p class="description">
+        A busca binária é um algoritmo eficiente de divisão e conquista usado para encontrar um valor específico em uma lista ordenada. Ela reduz drasticamente o tempo de pesquisa ao dividir o espaço de busca pela metade a cada comparação, descartando a parte onde o elemento não pode estar.
+    </p>
+
+    <!-- REFERÊNCIAS -->
+    <h2 class="section-title">Referências úteis</h2>
+
+    <div class="ref-box">
+        <a class="ref-link" href="https://cp-algorithms.com/num_methods/binary_search.html" target="_blank">
+            CP-Algorithms
+        </a>
+
+        <button class="status pending" onclick="toggleStatus(this)">Pendente</button>
+    </div>
+
+    <div class="ref-box">
+        <a class="ref-link" href="https://noic.com.br/materiais-informatica/curso/techniques-01/" target="_blank">
+            NOIC - Busca Binária
+        </a>
+        <button class="status pending" onclick="toggleStatus(this)">Pendente</button>
+    </div>
+
+    <div class="ref-box">
+        <span>Exemplos práticos</span>
+        <button class="status pending" onclick="toggleStatus(this)">Pendente</button>
+    </div>
+
+    <!-- PROBLEMAS -->
+    <h2 class="section-title">Lista de problemas</h2>
+
+    <!-- PROBLEMA 1 -->
+    <div class="problem-box">
+        <div class="color-bar green"></div>
+
+        <a class="problem-title-link" href="https://codeforces.com/problemset/problem/2229/G?mobile=true" target="_blank">
+            Problema 1 - Roadworks
+        </a>
+
+        <a class="solution-btn" href="solucao.html" target="_blank">
+            Solução
+        </a>
+
+        <button class="ac-btn na" onclick="toggleAC(this)">NA</button>
+    </div>
+
+    <!-- PROBLEMA 2 -->
+    <div class="problem-box">
+        <div class="color-bar yellow"></div>
+
+        <span>Problema 2 - Nome 2</span>
+
+        <a class="solution-btn" href="solucao.html" target="_blank">
+            Solução
+        </a>
+
+        <button class="ac-btn na" onclick="toggleAC(this)">NA</button>
+    </div>
+
+    <!-- PROBLEMA 3 -->
+    <div class="problem-box">
+        <div class="color-bar red"></div>
+
+        <span>Problema 3 - Nome 3</span>
+
+        <a class="solution-btn" href="https://codeforces.com/problemset/problem/1/C" target="_blank">
+            Solução
+        </a>
+
+        <button class="ac-btn na" onclick="toggleAC(this)">NA</button>
+    </div>
+
+</div>
+
+<script>
+function toggleStatus(btn){
+    if(btn.classList.contains("pending")){
+        btn.classList.remove("pending");
+        btn.classList.add("done");
+        btn.textContent = "Lido";
+    }else{
+        btn.classList.remove("done");
+        btn.classList.add("pending");
+        btn.textContent = "Pendente";
+    }
+}
+
+function toggleAC(btn){
+    if(btn.classList.contains("na")){
+        btn.classList.remove("na");
+        btn.classList.add("ac");
+        btn.textContent = "AC";
+    }else{
+        btn.classList.remove("ac");
+        btn.classList.add("na");
+        btn.textContent = "NA";
+    }
+}
+</script>
+
+</body>
+</html>

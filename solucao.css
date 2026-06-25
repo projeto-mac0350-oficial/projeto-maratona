@@ -1,0 +1,181 @@
+/* BODY */
+body{
+    background:#f5f5f5;
+    font-family:Arial, Helvetica, sans-serif;
+    color:#1f2937;
+    line-height:1.45;
+}
+
+/* CONTAINER */
+.container{
+    max-width:1100px;
+    margin:40px auto;
+    padding:0 20px;
+}
+
+/* TÍTULO */
+.problem-title{
+    text-align:center;
+    font-size:2.6rem;
+    margin-bottom:30px;
+    color:#111827;
+}
+
+/* SEÇÕES */
+.section{
+    background:#ffffff;
+    padding:30px;
+    margin-bottom:25px;
+    border-radius:12px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* TÍTULO NORMAL (ENUNCIADO) */
+.section > h2{
+    color:#1f2937;
+    margin-bottom:20px;
+    padding-bottom:8px;
+    border-bottom:2px solid #d1d5db;
+}
+
+/* HEADER DAS SEÇÕES COM BOTÃO */
+.section-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.section-header h2{
+    color:#1f2937;
+    margin:0;
+    padding-bottom:8px;
+    border-bottom:2px solid #d1d5db;
+    flex:1;
+}
+
+/* BOTÃO */
+.toggle-btn{
+    margin-left:20px;
+
+    background:#e5e7eb;
+    border:none;
+    padding:7px 14px;
+    border-radius:8px;
+
+    cursor:pointer;
+    font-size:13px;
+    font-weight:500;
+    color:#111827;
+
+    transition:background 0.2s;
+}
+
+.toggle-btn:hover{
+    background:#d1d5db;
+}
+
+/* TEXTO */
+.statement p,
+.solution p{
+    margin-bottom:12px;
+    font-size:16px;
+    line-height:1.55;
+}
+
+.statement ol{
+    margin:15px 0 15px 25px;
+}
+
+.statement li{
+    margin-bottom:8px;
+}
+
+/* LINK BOX */
+.info-box{
+    margin-top:25px;
+    background:#f3f4f6;
+    border-left:5px solid #374151;
+    border-radius:10px;
+    padding:15px 20px;
+}
+
+.info-box strong{
+    color:#111827;
+}
+
+.info-box a{
+    color:#1f2937;
+    text-decoration:none;
+    font-weight:600;
+    margin-left:8px;
+}
+
+.info-box a:hover{
+    text-decoration:underline;
+}
+
+/* CÓDIGO */
+.code-block{
+    background:#111827;
+    color:#f9fafb;
+    padding:20px;
+    border-radius:10px;
+    overflow-x:auto;
+    font-size:14px;
+    line-height:1.45;
+}
+
+.code-block code{
+    font-family:Consolas, "Courier New", monospace;
+    white-space:pre;
+}
+
+/* SCROLLBAR DO CÓDIGO */
+.code-block::-webkit-scrollbar{
+    height:8px;
+}
+
+.code-block::-webkit-scrollbar-track{
+    background:#1f2937;
+}
+
+.code-block::-webkit-scrollbar-thumb{
+    background:#4b5563;
+    border-radius:4px;
+}
+
+/* ESCONDER CONTEÚDO */
+.hidden{
+    display:none;
+}
+
+/* RESPONSIVO */
+@media (max-width:768px){
+
+    .container{
+        padding:0 15px;
+    }
+
+    .problem-title{
+        font-size:2rem;
+    }
+
+    .section{
+        padding:20px;
+    }
+
+    .section-header{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:10px;
+    }
+
+    .toggle-btn{
+        margin-left:0;
+    }
+
+    .code-block{
+        font-size:13px;
+    }
+}
