@@ -1,5 +1,6 @@
 import os
 import sqlite3
+from contextlib import closing
 
 from flask import Flask, jsonify
 
@@ -13,18 +14,17 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-change-me")
 
 def init_db():
     """Create the users table if it doesn't exist yet (idempotent)."""
-    db = sqlite3.connect(DATABASE)
-    db.execute(
-        """
-        CREATE TABLE IF NOT EXISTS users (
-            id            INTEGER PRIMARY KEY AUTOINCREMENT,
-            username      TEXT UNIQUE NOT NULL,
-            password_hash TEXT NOT NULL
+    with closing(sqlite3.connect(DATABASE)) as db:
+        db.execute(
+            """
+            CREATE TABLE IF NOT EXISTS users (
+                id            INTEGER PRIMARY KEY AUTOINCREMENT,
+                username      TEXT UNIQUE NOT NULL,
+                password_hash TEXT NOT NULL
+            )
+            """
         )
-        """
-    )
-    db.commit()
-    db.close()
+        db.commit()
 
 
 @app.get("/health")
