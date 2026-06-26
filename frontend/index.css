@@ -1,0 +1,265 @@
+/* ===========================================================================
+   HOMEPAGE — Projeto Maratona
+   Theme tokens (light default + dark override). The brand header from base.css
+   stays orange in both themes; everything below it follows the tokens.
+   =========================================================================== */
+:root {
+    --bg: #f5f5f5;
+    --card-bg: #ffffff;
+    --text: #1f2937;
+    --text-strong: #111827;
+    --muted: #6b7280;
+    --field-bg: #f4f4f4;
+    --field-border: #d1d5db;
+    --border: #e5e7eb;
+    --brand: #E64F2E;
+    --brand-hover: #FFB7D5;
+    --accent: #3b82f6;
+    --accent-hover: #2563eb;
+    --danger: #e74c3c;
+    --success: #2ecc71;
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] {
+    --bg: #0f172a;
+    --card-bg: #1e293b;
+    --text: #e2e8f0;
+    --text-strong: #f8fafc;
+    --muted: #94a3b8;
+    --field-bg: #0f172a;
+    --field-border: #475569;
+    --border: #334155;
+    --shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
+}
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    transition: background 0.3s, color 0.3s;
+}
+
+/* Theme toggle sits in the orange header (base.css .head_botoes button) */
+#theme-toggle {
+    min-width: 110px;
+}
+
+/* --- Layout --------------------------------------------------------------- */
+.home {
+    max-width: 820px;
+    width: 100%;
+    margin: 40px auto;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+.card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    padding: 30px;
+    margin-bottom: 25px;
+    transition: background 0.3s, border-color 0.3s;
+}
+
+/* --- Hero ----------------------------------------------------------------- */
+.hero .title {
+    font-size: 34px;
+    margin-bottom: 12px;
+    color: var(--text-strong);
+}
+
+.hero .description {
+    color: var(--text);
+    font-size: 17px;
+    line-height: 1.6;
+}
+
+.hero .description a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.hero .description a:hover {
+    text-decoration: underline;
+    color: var(--accent-hover);
+}
+
+/* --- Auth card ------------------------------------------------------------ */
+.auth-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 22px;
+    border-bottom: 2px solid var(--border);
+}
+
+.auth-tab {
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    padding: 10px 14px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+}
+
+.auth-tab:hover {
+    color: var(--text-strong);
+}
+
+.auth-tab.active {
+    color: var(--brand);
+    border-bottom-color: var(--brand);
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.field label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-strong);
+}
+
+.field input {
+    background: var(--field-bg);
+    color: var(--text);
+    border: 1px solid var(--field-border);
+    border-radius: 8px;
+    padding: 11px 13px;
+    font-size: 15px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.field input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+
+.btn-primary {
+    background: var(--brand);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.btn-primary:hover {
+    background: var(--brand-hover);
+}
+
+.btn-primary:disabled {
+    opacity: 0.6;
+    cursor: progress;
+}
+
+/* Feedback line under each form */
+.form-msg {
+    margin: 0;
+    font-size: 14px;
+    min-height: 1.2em;
+}
+
+.form-msg.error {
+    color: var(--danger);
+}
+
+.form-msg.success {
+    color: var(--success);
+}
+
+/* --- Logged-in panel ------------------------------------------------------ */
+.account h2 {
+    color: var(--text-strong);
+    margin-bottom: 12px;
+}
+
+.account p {
+    color: var(--text);
+    line-height: 1.6;
+    margin-bottom: 18px;
+}
+
+.account-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.btn-link {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    text-decoration: none;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.btn-link:hover {
+    background: var(--accent-hover);
+}
+
+.btn-secondary {
+    background: var(--field-bg);
+    color: var(--text-strong);
+    border: 1px solid var(--field-border);
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-secondary:hover {
+    background: var(--border);
+}
+
+/* --- Footer --------------------------------------------------------------- */
+.site-footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+    padding: 18px;
+}
+
+.hidden {
+    display: none;
+}
+
+/* --- Responsive ----------------------------------------------------------- */
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 1.6rem;
+    }
+
+    .home {
+        margin: 24px auto;
+    }
+
+    .card {
+        padding: 22px;
+    }
+}

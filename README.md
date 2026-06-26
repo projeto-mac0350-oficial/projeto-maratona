@@ -1,26 +1,29 @@
 # Projeto Maratona
 
-Plataforma de estudos para maratona de programação: um backend Flask (autenticação)
-e um frontend estático com páginas de conteúdo e soluções de problemas.
+Plataforma de estudos para maratona de programação: um backend Flask com
+autenticação por sessão e um frontend com páginas de conteúdo e soluções.
+O backend também serve as páginas do frontend, então tudo roda na mesma origem.
 
 ## Estrutura
 
 ```
 projeto-maratona/
-├── backend/                # API Flask
-│   ├── app.py              # rotas, init_db(), auth (em construção)
+├── backend/                # API Flask + serve o frontend
+│   ├── app.py              # rotas, init_db(), auth (register/login/logout/me)
 │   └── requirements.txt
-├── frontend/               # páginas estáticas (HTML + CSS)
+├── frontend/               # páginas (HTML + CSS)
+│   ├── index.html          # homepage: login/registro + tema claro/escuro
+│   ├── index.css           # estilos da homepage (com tokens de tema)
 │   ├── busca_binaria.html  # página de conteúdo (tema + referências + problemas)
 │   ├── solucao.html        # página de solução de um problema
-│   ├── base.css
+│   ├── base.css            # cabeçalho/identidade visual compartilhada
 │   ├── conteudo.css
 │   └── solucao.css
 ├── PLAN.md                 # plano de entrega (PRs atômicos)
 └── README.md
 ```
 
-## Backend
+## Como rodar
 
 ```bash
 cd backend
@@ -29,16 +32,28 @@ pip install -r requirements.txt
 python app.py                 # http://127.0.0.1:5000
 ```
 
-Endpoints disponíveis:
+Abra <http://127.0.0.1:5000> — a homepage (`index.html`) é servida em `/`, com
+login/registro e alternância de tema claro/escuro (a preferência é salva no
+`localStorage`). O banco SQLite (`users.db`) é criado automaticamente no primeiro
+start e é ignorado pelo Git. Defina `SECRET_KEY` no ambiente para produção.
 
-- `GET /health` — verificação de liveness (retorna `{"status": "ok"}`)
+## Endpoints
 
-As rotas de autenticação (`/register`, `/login`, `/logout`, `/me`) estão planejadas
-em [`PLAN.md`](PLAN.md). O banco SQLite (`users.db`) é criado automaticamente no
-primeiro start e é ignorado pelo Git.
+| Método | Rota         | Descrição                                             |
+| ------ | ------------ | ----------------------------------------------------- |
+| GET    | `/`          | Homepage (`index.html`)                               |
+| GET    | `/health`    | Liveness — `{"status": "ok"}`                         |
+| POST   | `/register`  | `{username, password}` → cria usuário; `409` se já existe, `400` se faltar campo |
+| POST   | `/login`     | `{username, password}` → inicia a sessão; `401` se inválido |
+| POST   | `/logout`    | Encerra a sessão                                      |
+| GET    | `/me`        | Protegida — retorna o usuário logado, ou `401`        |
+
+As senhas são guardadas com hash (`werkzeug.security`) e a sessão usa cookie
+assinado do Flask.
 
 ## Frontend
 
-As páginas são estáticas — basta abrir os arquivos `.html` em `frontend/` no
-navegador (ex.: `frontend/busca_binaria.html`). Os links entre páginas e folhas
-de estilo são relativos à própria pasta `frontend/`.
+As páginas em `frontend/` usam links relativos (CSS e navegação) e são servidas
+pelo Flask na mesma origem da API — isso é o que faz o cookie de sessão do login
+funcionar nas chamadas a `/me`. A homepage (`/`) é o ponto de entrada; as demais
+páginas (ex.: `/busca_binaria.html`) também são servidas pelo backend.

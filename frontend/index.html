@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projeto Maratona</title>
+
+    <link rel="stylesheet" href="./base.css">
+    <link rel="stylesheet" href="./index.css">
+
+    <!-- Apply the saved theme before first paint to avoid a flash. -->
+    <script>
+        (function () {
+            var saved = localStorage.getItem("theme");
+            if (saved) {
+                document.documentElement.setAttribute("data-theme", saved);
+            }
+        })();
+    </script>
+</head>
+
+<body>
+
+<header>
+    <h1>Projeto Maratona</h1>
+
+    <nav class="barra-navegacao">
+        <div class="head_botoes">
+            <button id="theme-toggle" type="button">🌙 Escuro</button>
+        </div>
+    </nav>
+</header>
+
+<main>
+    <div class="home">
+
+        <!-- HERO -->
+        <section class="card hero">
+            <h1 class="title">Bem-vindo à Maratona</h1>
+            <p class="description">
+                Plataforma de estudos para maratona de programação: conteúdos,
+                listas de problemas e soluções comentadas. Entre ou crie uma
+                conta para acompanhar o seu progresso. Já quer ver um tema?
+                Comece pela <a href="busca_binaria.html">Busca Binária</a>.
+            </p>
+        </section>
+
+        <!-- LOGIN / REGISTER (visitante) -->
+        <section class="card auth" id="auth-card">
+            <div class="auth-tabs">
+                <button class="auth-tab active" type="button" data-target="login">Entrar</button>
+                <button class="auth-tab" type="button" data-target="register">Criar conta</button>
+            </div>
+
+            <!-- LOGIN -->
+            <form class="auth-form" id="login-form" novalidate>
+                <div class="field">
+                    <label for="login-username">Usuário</label>
+                    <input id="login-username" name="username" type="text" autocomplete="username" required>
+                </div>
+                <div class="field">
+                    <label for="login-password">Senha</label>
+                    <input id="login-password" name="password" type="password" autocomplete="current-password" required>
+                </div>
+                <button class="btn-primary" type="submit">Entrar</button>
+                <p class="form-msg" id="login-msg" role="status" aria-live="polite"></p>
+            </form>
+
+            <!-- REGISTER -->
+            <form class="auth-form hidden" id="register-form" novalidate>
+                <div class="field">
+                    <label for="register-username">Usuário</label>
+                    <input id="register-username" name="username" type="text" autocomplete="username" required>
+                </div>
+                <div class="field">
+                    <label for="register-password">Senha</label>
+                    <input id="register-password" name="password" type="password" autocomplete="new-password" required>
+                </div>
+                <button class="btn-primary" type="submit">Criar conta</button>
+                <p class="form-msg" id="register-msg" role="status" aria-live="polite"></p>
+            </form>
+        </section>
+
+        <!-- PAINEL DO USUÁRIO (logado) -->
+        <section class="card account hidden" id="account-card">
+            <h2>Olá, <span id="account-username"></span> 👋</h2>
+            <p>Você está conectado. Bons estudos!</p>
+            <div class="account-actions">
+                <a class="btn-link" href="busca_binaria.html">Ver conteúdos</a>
+                <button class="btn-secondary" id="logout-btn" type="button">Sair</button>
+            </div>
+        </section>
+
+    </div>
+</main>
+
+<footer class="site-footer">
+    Projeto Maratona — MAC0350
+</footer>
+
+<script>
+const root = document.documentElement;
+
+/* --- Tema claro/escuro --------------------------------------------------- */
+const themeToggle = document.getElementById("theme-toggle");
+
+function refreshThemeLabel() {
+    const dark = root.getAttribute("data-theme") === "dark";
+    themeToggle.textContent = dark ? "☀️ Claro" : "🌙 Escuro";
+}
+
+themeToggle.addEventListener("click", () => {
+    const next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    localStorage.setItem("theme", next);
+    refreshThemeLabel();
+});
+
+refreshThemeLabel();
+
+/* --- Alternância Entrar / Criar conta ------------------------------------ */
+const tabs = document.querySelectorAll(".auth-tab");
+const authForms = {
+    login: document.getElementById("login-form"),
+    register: document.getElementById("register-form"),
+};
+
+tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+        tabs.forEach((t) => t.classList.remove("active"));
+        tab.classList.add("active");
+        const target = tab.dataset.target;
+        Object.entries(authForms).forEach(([name, form]) => {
+            form.classList.toggle("hidden", name !== target);
+        });
+    });
+});
+
+/* --- Helpers ------------------------------------------------------------- */
+function showMessage(el, text, type) {
+    el.textContent = text;
+    el.className = "form-msg" + (type ? " " + type : "");
+}
+
+async function postJSON(path, body) {
+    const res = await fetch(path, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+        credentials: "same-origin",
+    });
+    let data = {};
+    try {
+        data = await res.json();
+    } catch (e) {
+        /* empty / non-JSON body */
+    }
+    return { ok: res.ok, status: res.status, data };
+}
+
+/* --- Estado: logado vs. visitante ---------------------------------------- */
+const authCard = document.getElementById("auth-card");
+const accountCard = document.getElementById("account-card");
+
+function showLoggedIn(username) {
+    document.getElementById("account-username").textContent = username;
+    authCard.classList.add("hidden");
+    accountCard.classList.remove("hidden");
+}
+
+function showLoggedOut() {
+    accountCard.classList.add("hidden");
+    authCard.classList.remove("hidden");
+}
+
+/* --- Login --------------------------------------------------------------- */
+const loginForm = authForms.login;
+const loginMsg = document.getElementById("login-msg");
+
+loginForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const username = loginForm.username.value.trim();
+    const password = loginForm.password.value;
+    if (!username || !password) {
+        showMessage(loginMsg, "Preencha usuário e senha.", "error");
+        return;
+    }
+
+    const button = loginForm.querySelector("button[type=submit]");
+    button.disabled = true;
+    showMessage(loginMsg, "Entrando...", null);
+    try {
+        const { ok, status, data } = await postJSON("/login", { username, password });
+        if (ok) {
+            loginForm.reset();
+            showMessage(loginMsg, "", null);
+            showLoggedIn(data.username);
+        } else if (status === 401) {
+            showMessage(loginMsg, "Usuário ou senha inválidos.", "error");
+        } else {
+            showMessage(loginMsg, data.error || "Falha ao entrar.", "error");
+        }
+    } catch (err) {
+        showMessage(loginMsg, "Não foi possível conectar ao servidor.", "error");
+    } finally {
+        button.disabled = false;
+    }
+});
+
+/* --- Registro (cria a conta e já entra) ---------------------------------- */
+const registerForm = authForms.register;
+const registerMsg = document.getElementById("register-msg");
+
+registerForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const username = registerForm.username.value.trim();
+    const password = registerForm.password.value;
+    if (!username || !password) {
+        showMessage(registerMsg, "Preencha usuário e senha.", "error");
+        return;
+    }
+
+    const button = registerForm.querySelector("button[type=submit]");
+    button.disabled = true;
+    showMessage(registerMsg, "Criando conta...", null);
+    try {
+        const reg = await postJSON("/register", { username, password });
+        if (!reg.ok) {
+            const msg = reg.status === 409
+                ? "Esse usuário já existe. Escolha outro."
+                : reg.data.error || "Falha ao criar conta.";
+            showMessage(registerMsg, msg, "error");
+            return;
+        }
+        // Conta criada: faz login automático para já entrar.
+        const login = await postJSON("/login", { username, password });
+        if (login.ok) {
+            registerForm.reset();
+            showMessage(registerMsg, "", null);
+            showLoggedIn(login.data.username);
+        } else {
+            showMessage(registerMsg, "Conta criada. Faça login para entrar.", "success");
+        }
+    } catch (err) {
+        showMessage(registerMsg, "Não foi possível conectar ao servidor.", "error");
+    } finally {
+        button.disabled = false;
+    }
+});
+
+/* --- Logout -------------------------------------------------------------- */
+document.getElementById("logout-btn").addEventListener("click", async () => {
+    try {
+        await fetch("/logout", { method: "POST", credentials: "same-origin" });
+    } catch (err) {
+        /* ignore: limpamos a UI de qualquer forma */
+    }
+    showLoggedOut();
+});
+
+/* --- Sessão existente ao abrir a página ---------------------------------- */
+(async () => {
+    try {
+        const res = await fetch("/me", { credentials: "same-origin" });
+        if (res.ok) {
+            const data = await res.json();
+            showLoggedIn(data.username);
+        }
+    } catch (err) {
+        /* sem backend / sem sessão: segue como visitante */
+    }
+})();
+</script>
+
+</body>
+</html>
