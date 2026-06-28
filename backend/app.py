@@ -54,6 +54,133 @@ def init_db():
             )
             """
         )
+        # Study content: topics and their items (references to read + problems to
+        # solve). This is course-authored reference data — read-only over the API
+        # and seeded from SEED_CONTENT below, so adding a topic means editing data,
+        # not hand-writing an HTML page.
+        db.execute(
+            """
+            CREATE TABLE IF NOT EXISTS topics (
+                id       INTEGER PRIMARY KEY AUTOINCREMENT,
+                slug     TEXT UNIQUE NOT NULL,
+                title    TEXT NOT NULL,
+                summary  TEXT,
+                position INTEGER NOT NULL DEFAULT 0
+            )
+            """
+        )
+        db.execute(
+            """
+            CREATE TABLE IF NOT EXISTS topic_items (
+                id           INTEGER PRIMARY KEY AUTOINCREMENT,
+                topic_id     INTEGER NOT NULL REFERENCES topics(id),
+                kind         TEXT    NOT NULL,   -- 'ref' | 'problem'
+                slug         TEXT    NOT NULL,
+                title        TEXT    NOT NULL,
+                url          TEXT,               -- reference / problem-statement link
+                solution_url TEXT,               -- problems only
+                position     INTEGER NOT NULL DEFAULT 0,
+                UNIQUE (topic_id, kind, slug)
+            )
+            """
+        )
+        db.commit()
+    seed_content()
+
+
+# Course-authored study content. Each topic lists references to read and
+# problems to solve; "url" is the external link, "solution_url" the local
+# solution page. To add material, edit this structure — the schema and API
+# stay the same. Item order here is the order shown to the student.
+SEED_CONTENT = [
+    {
+        "slug": "busca_binaria",
+        "title": "Busca Binária",
+        "summary": (
+            "A busca binária é um algoritmo eficiente de divisão e conquista "
+            "usado para encontrar um valor específico em uma lista ordenada. "
+            "Ela reduz drasticamente o tempo de pesquisa ao dividir o espaço de "
+            "busca pela metade a cada comparação, descartando a parte onde o "
+            "elemento não pode estar."
+        ),
+        "references": [
+            {
+                "slug": "cp-algorithms",
+                "title": "CP-Algorithms",
+                "url": "https://cp-algorithms.com/num_methods/binary_search.html",
+            },
+            {
+                "slug": "noic",
+                "title": "NOIC - Busca Binária",
+                "url": "https://noic.com.br/materiais-informatica/curso/techniques-01/",
+            },
+            {"slug": "exemplos-praticos", "title": "Exemplos práticos", "url": None},
+        ],
+        "problems": [
+            {
+                "slug": "roadworks",
+                "title": "Roadworks",
+                "url": "https://codeforces.com/problemset/problem/2229/G?mobile=true",
+                "solution_url": "solucao.html",
+            },
+            {
+                "slug": "nome-2",
+                "title": "Nome 2",
+                "url": None,
+                "solution_url": "solucao.html",
+            },
+            {
+                "slug": "nome-3",
+                "title": "Nome 3",
+                "url": "https://codeforces.com/problemset/problem/1/C",
+                "solution_url": "solucao.html",
+            },
+        ],
+    },
+]
+
+
+def seed_content():
+    """Upsert SEED_CONTENT into the topics tables (idempotent, by slug)."""
+    with closing(get_db()) as db:
+        for t_pos, topic in enumerate(SEED_CONTENT):
+            db.execute(
+                """
+                INSERT INTO topics (slug, title, summary, position)
+                VALUES (?, ?, ?, ?)
+                ON CONFLICT(slug) DO UPDATE SET
+                    title    = excluded.title,
+                    summary  = excluded.summary,
+                    position = excluded.position
+                """,
+                (topic["slug"], topic["title"], topic["summary"], t_pos),
+            )
+            topic_id = db.execute(
+                "SELECT id FROM topics WHERE slug = ?", (topic["slug"],)
+            ).fetchone()["id"]
+            for kind, key in (("ref", "references"), ("problem", "problems")):
+                for i_pos, item in enumerate(topic.get(key, [])):
+                    db.execute(
+                        """
+                        INSERT INTO topic_items
+                            (topic_id, kind, slug, title, url, solution_url, position)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                        ON CONFLICT(topic_id, kind, slug) DO UPDATE SET
+                            title        = excluded.title,
+                            url          = excluded.url,
+                            solution_url = excluded.solution_url,
+                            position     = excluded.position
+                        """,
+                        (
+                            topic_id,
+                            kind,
+                            item["slug"],
+                            item["title"],
+                            item.get("url"),
+                            item.get("solution_url"),
+                            i_pos,
+                        ),
+                    )
         db.commit()
 
 
@@ -194,6 +321,67 @@ def set_progress():
         db.commit()
 
     return jsonify(item_key=item_key, done=bool(done))
+
+
+# --- Content ---------------------------------------------------------------
+
+
+def _serialize_item(topic_slug, row):
+    """Shape a topic_items row for the API, deriving the progress item_key and
+    the dashboard label so the frontend doesn't have to know the conventions."""
+    short = "prob" if row["kind"] == "problem" else "ref"
+    item = {
+        "slug": row["slug"],
+        "title": row["title"],
+        "kind": row["kind"],
+        "url": row["url"],
+        "item_key": f"{topic_slug}:{short}:{row['slug']}",
+        # Problems show a 1-based number on the dashboard; refs use their title.
+        "label": (
+            f"Problema {row['position'] + 1} - {row['title']}"
+            if row["kind"] == "problem"
+            else row["title"]
+        ),
+    }
+    if row["kind"] == "problem":
+        item["solution_url"] = row["solution_url"]
+    return item
+
+
+@app.get("/topics")
+def list_topics():
+    """List the available study topics (summary only — no items)."""
+    with closing(get_db()) as db:
+        rows = db.execute(
+            "SELECT slug, title, summary FROM topics ORDER BY position, id"
+        ).fetchall()
+    return jsonify([dict(row) for row in rows])
+
+
+@app.get("/topics/<slug>")
+def get_topic(slug):
+    """Return one topic with its references and problems, in authoring order."""
+    with closing(get_db()) as db:
+        topic = db.execute(
+            "SELECT id, slug, title, summary FROM topics WHERE slug = ?", (slug,)
+        ).fetchone()
+        if topic is None:
+            return jsonify(error="topic not found"), 404
+        items = db.execute(
+            """
+            SELECT kind, slug, title, url, solution_url, position
+            FROM topic_items WHERE topic_id = ? ORDER BY position, id
+            """,
+            (topic["id"],),
+        ).fetchall()
+
+    return jsonify(
+        slug=topic["slug"],
+        title=topic["title"],
+        summary=topic["summary"],
+        references=[_serialize_item(slug, r) for r in items if r["kind"] == "ref"],
+        problems=[_serialize_item(slug, r) for r in items if r["kind"] == "problem"],
+    )
 
 
 # Ensure the schema exists for both `python app.py` and `flask run`.
