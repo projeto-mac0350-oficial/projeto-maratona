@@ -26,6 +26,13 @@
 
     <nav class="barra-navegacao">
         <div class="head_botoes">
+            <!-- Visitante: botão de login no canto superior -->
+            <button id="signin-btn" type="button">Entrar</button>
+
+            <!-- Logado: saudação + sair (escondidos até logar) -->
+            <span id="user-greeting" class="user-greeting hidden">Olá, <strong id="header-username"></strong></span>
+            <button id="logout-btn" class="hidden" type="button">Sair</button>
+
             <button id="theme-toggle" type="button">🌙 Escuro</button>
         </div>
     </nav>
@@ -39,46 +46,11 @@
             <h1 class="title">Bem-vindo à Maratona</h1>
             <p class="description">
                 Plataforma de estudos para maratona de programação: conteúdos,
-                listas de problemas e soluções comentadas. Entre ou crie uma
-                conta para acompanhar o seu progresso. Já quer ver um tema?
-                Comece pela <a href="busca_binaria.html">Busca Binária</a>.
+                listas de problemas e soluções comentadas. Use o botão
+                <strong>Entrar</strong> no topo para acessar a sua conta e
+                acompanhar o seu progresso. Já quer ver um tema? Comece pela
+                <a href="busca_binaria.html">Busca Binária</a>.
             </p>
-        </section>
-
-        <!-- LOGIN / REGISTER (visitante) -->
-        <section class="card auth" id="auth-card">
-            <div class="auth-tabs">
-                <button class="auth-tab active" type="button" data-target="login">Entrar</button>
-                <button class="auth-tab" type="button" data-target="register">Criar conta</button>
-            </div>
-
-            <!-- LOGIN -->
-            <form class="auth-form" id="login-form" novalidate>
-                <div class="field">
-                    <label for="login-username">Usuário</label>
-                    <input id="login-username" name="username" type="text" autocomplete="username" required>
-                </div>
-                <div class="field">
-                    <label for="login-password">Senha</label>
-                    <input id="login-password" name="password" type="password" autocomplete="current-password" required>
-                </div>
-                <button class="btn-primary" type="submit">Entrar</button>
-                <p class="form-msg" id="login-msg" role="status" aria-live="polite"></p>
-            </form>
-
-            <!-- REGISTER -->
-            <form class="auth-form hidden" id="register-form" novalidate>
-                <div class="field">
-                    <label for="register-username">Usuário</label>
-                    <input id="register-username" name="username" type="text" autocomplete="username" required>
-                </div>
-                <div class="field">
-                    <label for="register-password">Senha</label>
-                    <input id="register-password" name="password" type="password" autocomplete="new-password" required>
-                </div>
-                <button class="btn-primary" type="submit">Criar conta</button>
-                <p class="form-msg" id="register-msg" role="status" aria-live="polite"></p>
-            </form>
         </section>
 
         <!-- PAINEL DO USUÁRIO (logado) -->
@@ -88,12 +60,52 @@
             <div class="account-actions">
                 <a class="btn-link" href="busca_binaria.html">Ver conteúdos</a>
                 <a class="btn-link" href="painel.html">Meu painel</a>
-                <button class="btn-secondary" id="logout-btn" type="button">Sair</button>
             </div>
         </section>
 
     </div>
 </main>
+
+<!-- LOGIN / REGISTER — modal aberto pelo botão "Entrar" do cabeçalho -->
+<dialog class="auth-dialog" id="auth-dialog">
+    <form method="dialog" class="auth-dialog-head">
+        <h2>Acesse sua conta</h2>
+        <button class="dialog-close" type="submit" aria-label="Fechar">✕</button>
+    </form>
+
+    <div class="auth-tabs">
+        <button class="auth-tab active" type="button" data-target="login">Entrar</button>
+        <button class="auth-tab" type="button" data-target="register">Criar conta</button>
+    </div>
+
+    <!-- LOGIN -->
+    <form class="auth-form" id="login-form" novalidate>
+        <div class="field">
+            <label for="login-username">Usuário</label>
+            <input id="login-username" name="username" type="text" autocomplete="username" required>
+        </div>
+        <div class="field">
+            <label for="login-password">Senha</label>
+            <input id="login-password" name="password" type="password" autocomplete="current-password" required>
+        </div>
+        <button class="btn-primary" type="submit">Entrar</button>
+        <p class="form-msg" id="login-msg" role="status" aria-live="polite"></p>
+    </form>
+
+    <!-- REGISTER -->
+    <form class="auth-form hidden" id="register-form" novalidate>
+        <div class="field">
+            <label for="register-username">Usuário</label>
+            <input id="register-username" name="username" type="text" autocomplete="username" required>
+        </div>
+        <div class="field">
+            <label for="register-password">Senha</label>
+            <input id="register-password" name="password" type="password" autocomplete="new-password" required>
+        </div>
+        <button class="btn-primary" type="submit">Criar conta</button>
+        <p class="form-msg" id="register-msg" role="status" aria-live="polite"></p>
+    </form>
+</dialog>
 
 <footer class="site-footer">
     Projeto Maratona — MAC0350
@@ -118,6 +130,23 @@ themeToggle.addEventListener("click", () => {
 });
 
 refreshThemeLabel();
+
+/* --- Modal de login (botão "Entrar" no cabeçalho) ------------------------ */
+const authDialog = document.getElementById("auth-dialog");
+const signinBtn = document.getElementById("signin-btn");
+
+signinBtn.addEventListener("click", () => {
+    if (typeof authDialog.showModal === "function") {
+        authDialog.showModal();
+    } else {
+        authDialog.setAttribute("open", "");
+    }
+});
+
+// Fecha ao clicar fora do conteúdo (na área do backdrop).
+authDialog.addEventListener("click", (e) => {
+    if (e.target === authDialog) authDialog.close();
+});
 
 /* --- Alternância Entrar / Criar conta ------------------------------------ */
 const tabs = document.querySelectorAll(".auth-tab");
@@ -160,18 +189,27 @@ async function postJSON(path, body) {
 }
 
 /* --- Estado: logado vs. visitante ---------------------------------------- */
-const authCard = document.getElementById("auth-card");
 const accountCard = document.getElementById("account-card");
+const userGreeting = document.getElementById("user-greeting");
+const headerUsername = document.getElementById("header-username");
+const logoutBtn = document.getElementById("logout-btn");
 
 function showLoggedIn(username) {
     document.getElementById("account-username").textContent = username;
-    authCard.classList.add("hidden");
+    headerUsername.textContent = username;
+    // Cabeçalho: troca "Entrar" por saudação + "Sair".
+    signinBtn.classList.add("hidden");
+    userGreeting.classList.remove("hidden");
+    logoutBtn.classList.remove("hidden");
     accountCard.classList.remove("hidden");
+    if (authDialog.open) authDialog.close();
 }
 
 function showLoggedOut() {
+    signinBtn.classList.remove("hidden");
+    userGreeting.classList.add("hidden");
+    logoutBtn.classList.add("hidden");
     accountCard.classList.add("hidden");
-    authCard.classList.remove("hidden");
 }
 
 /* --- Login --------------------------------------------------------------- */
@@ -250,7 +288,7 @@ registerForm.addEventListener("submit", async (e) => {
 });
 
 /* --- Logout -------------------------------------------------------------- */
-document.getElementById("logout-btn").addEventListener("click", async () => {
+logoutBtn.addEventListener("click", async () => {
     try {
         await fetch("/logout", { method: "POST", credentials: "same-origin" });
     } catch (err) {
