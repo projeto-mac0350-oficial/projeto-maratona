@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Painel — Projeto Maratona</title>
+
+    <link rel="stylesheet" href="./base.css">
+    <link rel="stylesheet" href="./index.css">
+
+    <!-- Apply the saved theme before first paint to avoid a flash. -->
+    <script>
+        (function () {
+            var saved = localStorage.getItem("theme");
+            if (saved) {
+                document.documentElement.setAttribute("data-theme", saved);
+            }
+        })();
+    </script>
+
+    <style>
+        /* Progress lists — themed via the tokens from index.css. */
+        .painel-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .painel-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .painel-list li:last-child {
+            border-bottom: none;
+        }
+
+        .painel-list li::before {
+            content: "✓ ";
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        .painel-empty {
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        .painel-summary {
+            color: var(--muted);
+            margin-top: 6px;
+        }
+
+        .section-heading {
+            color: var(--text-strong);
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Projeto Maratona</h1>
+
+    <nav class="barra-navegacao">
+        <div class="head_botoes">
+            <button id="theme-toggle" type="button">🌙 Escuro</button>
+        </div>
+    </nav>
+</header>
+
+<main>
+    <div class="home">
+
+        <!-- VISITANTE (sem sessão) -->
+        <section class="card hidden" id="guest-card">
+            <h2 class="section-heading">Meu painel</h2>
+            <p>Entre na sua conta para acompanhar o seu progresso de estudos.</p>
+            <div class="account-actions">
+                <a class="btn-link" href="index.html">Ir para o login</a>
+            </div>
+        </section>
+
+        <!-- LOGADO -->
+        <div class="hidden" id="painel-content">
+            <section class="card">
+                <h2 class="section-heading">Olá, <span id="painel-username"></span> 👋</h2>
+                <p>Aqui está o seu progresso de estudos.</p>
+                <p class="painel-summary" id="painel-summary"></p>
+                <div class="account-actions" style="margin-top: 16px;">
+                    <a class="btn-link" href="busca_binaria.html">Ver conteúdos</a>
+                    <a class="btn-link" href="index.html">Início</a>
+                </div>
+            </section>
+
+            <section class="card">
+                <h2 class="section-heading">Problemas resolvidos</h2>
+                <ul class="painel-list" id="list-problems"></ul>
+            </section>
+
+            <section class="card">
+                <h2 class="section-heading">Referências lidas</h2>
+                <ul class="painel-list" id="list-refs"></ul>
+            </section>
+        </div>
+
+    </div>
+</main>
+
+<footer class="site-footer">
+    Projeto Maratona — MAC0350
+</footer>
+
+<script>
+const root = document.documentElement;
+
+/* --- Tema claro/escuro (mesmo padrão da homepage) ------------------------ */
+const themeToggle = document.getElementById("theme-toggle");
+
+function refreshThemeLabel() {
+    const dark = root.getAttribute("data-theme") === "dark";
+    themeToggle.textContent = dark ? "☀️ Claro" : "🌙 Escuro";
+}
+
+themeToggle.addEventListener("click", () => {
+    const next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    localStorage.setItem("theme", next);
+    refreshThemeLabel();
+});
+
+refreshThemeLabel();
+
+/* --- Render das listas de progresso -------------------------------------- */
+function fillList(ul, items, emptyText) {
+    ul.innerHTML = "";
+    if (!items.length) {
+        const li = document.createElement("li");
+        li.className = "painel-empty";
+        li.textContent = emptyText;
+        ul.appendChild(li);
+        return;
+    }
+    items.forEach((label) => {
+        const li = document.createElement("li");
+        li.textContent = label;
+        ul.appendChild(li);
+    });
+}
+
+function render(progress) {
+    const done = Object.values(progress).filter((p) => p.done);
+    const problems = done.filter((p) => p.kind === "problem").map((p) => p.label || "(sem nome)");
+    const refs = done.filter((p) => p.kind === "ref").map((p) => p.label || "(sem nome)");
+
+    fillList(document.getElementById("list-problems"), problems, "Nenhum problema resolvido ainda.");
+    fillList(document.getElementById("list-refs"), refs, "Nenhuma referência lida ainda.");
+
+    document.getElementById("painel-summary").textContent =
+        `${problems.length} problema(s) resolvido(s) · ${refs.length} referência(s) lida(s)`;
+}
+
+/* --- Carrega sessão e progresso ------------------------------------------ */
+(async () => {
+    let me = null;
+    try {
+        const res = await fetch("/me", { credentials: "same-origin" });
+        if (res.ok) me = await res.json();
+    } catch (err) {
+        /* sem backend: trata como visitante */
+    }
+
+    if (!me) {
+        document.getElementById("guest-card").classList.remove("hidden");
+        return;
+    }
+
+    document.getElementById("painel-username").textContent = me.username;
+    document.getElementById("painel-content").classList.remove("hidden");
+
+    let progress = {};
+    try {
+        const res = await fetch("/progress", { credentials: "same-origin" });
+        if (res.ok) progress = await res.json();
+    } catch (err) {
+        /* mantém vazio */
+    }
+    render(progress);
+})();
+</script>
+
+</body>
+</html>
