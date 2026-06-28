@@ -1,0 +1,5 @@
+# Dev-only tools for code metrics (not needed to run the app).
+#   radon  -> cyclomatic complexity, maintainability index, raw metrics, Halstead
+#   pylint -> static analysis + a 0-10 quality score
+radon
+pylint
