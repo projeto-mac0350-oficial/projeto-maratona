@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projeto Maratona</title>
+
+    <link rel="stylesheet" href="./base.css">
+    <link rel="stylesheet" href="./conteudo.css">
+</head>
+
+<body>
+
+<div class="bb" id="topic">
+    <p class="topic-back"><a href="/">← Início</a></p>
+
+    <h1 class="title" id="topic-title">Carregando…</h1>
+    <p class="description" id="topic-summary"></p>
+
+    <section id="refs-section" hidden>
+        <h2 class="section-title">Referências úteis</h2>
+        <div id="refs"></div>
+    </section>
+
+    <section id="problems-section" hidden>
+        <h2 class="section-title">Lista de problemas</h2>
+        <div id="problems"></div>
+    </section>
+</div>
+
+<script>
+/*
+ * Generic content page: reads ?topic=<slug> and renders the topic from
+ * GET /topics/<slug>. The toggle buttons carry the same data-key/data-kind/
+ * data-label that progress.js expects, so per-user progress works exactly as
+ * on the old hand-written pages. progress.js is loaded only after the buttons
+ * exist (see the end), since it wires up whatever [data-key] elements are
+ * present when it runs.
+ */
+(async () => {
+    const titleEl = document.getElementById("topic-title");
+    const summaryEl = document.getElementById("topic-summary");
+
+    function fail(message) {
+        titleEl.textContent = message;
+        summaryEl.textContent = "";
+    }
+
+    const slug = new URLSearchParams(location.search).get("topic");
+    if (!slug) {
+        fail("Nenhum tópico informado");
+        summaryEl.textContent = "Volte ao início e escolha um conteúdo.";
+        return;
+    }
+
+    let topic;
+    try {
+        const res = await fetch(`/topics/${encodeURIComponent(slug)}`, {
+            credentials: "same-origin",
+        });
+        if (res.status === 404) {
+            fail("Tópico não encontrado");
+            return;
+        }
+        if (!res.ok) throw new Error("request failed");
+        topic = await res.json();
+    } catch (err) {
+        fail("Não foi possível carregar o conteúdo");
+        return;
+    }
+
+    document.title = `${topic.title} — Projeto Maratona`;
+    titleEl.textContent = topic.title;
+    summaryEl.textContent = topic.summary || "";
+
+    // A toggle button wired for progress.js (kind decides its on/off styling).
+    function makeToggle(item, classes, offText) {
+        const btn = document.createElement("button");
+        btn.className = classes;
+        btn.dataset.key = item.item_key;
+        btn.dataset.kind = item.kind;
+        btn.dataset.label = item.label;
+        btn.textContent = offText;
+        return btn;
+    }
+
+    // An external link, or a plain span when there's no URL.
+    function makeTitle(text, url, linkClass) {
+        if (!url) {
+            const span = document.createElement("span");
+            span.textContent = text;
+            return span;
+        }
+        const a = document.createElement("a");
+        a.className = linkClass;
+        a.href = url;
+        a.target = "_blank";
+        a.rel = "noopener";
+        a.textContent = text;
+        return a;
+    }
+
+    // References
+    if (topic.references.length) {
+        const refsEl = document.getElementById("refs");
+        topic.references.forEach((ref) => {
+            const box = document.createElement("div");
+            box.className = "ref-box";
+            box.appendChild(makeTitle(ref.title, ref.url, "ref-link"));
+            box.appendChild(makeToggle(ref, "status pending", "Pendente"));
+            refsEl.appendChild(box);
+        });
+        document.getElementById("refs-section").hidden = false;
+    }
+
+    // Problems
+    if (topic.problems.length) {
+        const problemsEl = document.getElementById("problems");
+        topic.problems.forEach((problem) => {
+            const box = document.createElement("div");
+            box.className = "problem-box";
+            box.appendChild(makeTitle(problem.label, problem.url, "problem-title-link"));
+            if (problem.solution_url) {
+                const sol = document.createElement("a");
+                sol.className = "solution-btn";
+                sol.href = problem.solution_url;
+                sol.target = "_blank";
+                sol.rel = "noopener";
+                sol.textContent = "Solução";
+                box.appendChild(sol);
+            }
+            box.appendChild(makeToggle(problem, "ac-btn na", "NA"));
+            problemsEl.appendChild(box);
+        });
+        document.getElementById("problems-section").hidden = false;
+    }
+
+    // Buttons exist now → load progress.js to reflect saved state and persist clicks.
+    const script = document.createElement("script");
+    script.src = "./progress.js";
+    document.body.appendChild(script);
+})();
+</script>
+
+</body>
+</html>
