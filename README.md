@@ -14,7 +14,8 @@ projeto-maratona/
 ├── frontend/               # páginas (HTML + CSS)
 │   ├── index.html          # homepage: login/registro + tema claro/escuro
 │   ├── index.css           # estilos da homepage (com tokens de tema)
-│   ├── busca_binaria.html  # página de conteúdo (tema + referências + problemas)
+│   ├── topic.html          # página de conteúdo genérica (renderiza GET /topics/<slug>)
+│   ├── busca_binaria.html  # redireciona p/ topic.html?topic=busca_binaria (compatibilidade)
 │   ├── solucao.html        # página de solução de um problema
 │   ├── painel.html         # dashboard: progresso do usuário logado
 │   ├── progress.js         # persiste os toggles "lido/resolvido" por usuário
@@ -51,6 +52,8 @@ start e é ignorado pelo Git. Defina `SECRET_KEY` no ambiente para produção.
 | GET    | `/me`        | Protegida — retorna o usuário logado, ou `401`        |
 | GET    | `/progress`  | Protegida — progresso do usuário, mapa por `item_key` |
 | POST   | `/progress`  | Protegida — salva `{item_key, kind, label, done}`     |
+| GET    | `/topics`    | Lista de tópicos de estudo (`slug`, `title`, `summary`) |
+| GET    | `/topics/<slug>` | Um tópico com `references` e `problems`; `404` se não existe |
 
 As senhas são guardadas com hash (`werkzeug.security`) e a sessão usa cookie
 assinado do Flask.
@@ -60,7 +63,12 @@ assinado do Flask.
 As páginas em `frontend/` usam links relativos (CSS e navegação) e são servidas
 pelo Flask na mesma origem da API — isso é o que faz o cookie de sessão do login
 funcionar nas chamadas a `/me`. A homepage (`/`) é o ponto de entrada; as demais
-páginas (ex.: `/busca_binaria.html`) também são servidas pelo backend.
+páginas (ex.: `/topic.html?topic=busca_binaria`) também são servidas pelo backend.
+
+O conteúdo de estudo vem do banco (tabelas `topics`/`topic_items`, populadas por
+`SEED_CONTENT` em `app.py`): `topic.html` lê o `slug` da query string, busca
+`GET /topics/<slug>` e monta a página. Cada item já traz o `item_key` e o `label`
+usados pelo `progress.js`, então os toggles persistem como nas páginas estáticas.
 
 ## Progresso de estudos
 
