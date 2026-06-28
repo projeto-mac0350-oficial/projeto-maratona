@@ -29,19 +29,19 @@
             CP-Algorithms
         </a>
 
-        <button class="status pending" onclick="toggleStatus(this)">Pendente</button>
+        <button class="status pending" data-key="busca_binaria:ref:cp-algorithms" data-kind="ref" data-label="CP-Algorithms">Pendente</button>
     </div>
 
     <div class="ref-box">
         <a class="ref-link" href="https://noic.com.br/materiais-informatica/curso/techniques-01/" target="_blank">
             NOIC - Busca Binária
         </a>
-        <button class="status pending" onclick="toggleStatus(this)">Pendente</button>
+        <button class="status pending" data-key="busca_binaria:ref:noic" data-kind="ref" data-label="NOIC - Busca Binária">Pendente</button>
     </div>
 
     <div class="ref-box">
         <span>Exemplos práticos</span>
-        <button class="status pending" onclick="toggleStatus(this)">Pendente</button>
+        <button class="status pending" data-key="busca_binaria:ref:exemplos-praticos" data-kind="ref" data-label="Exemplos práticos">Pendente</button>
     </div>
 
     <!-- PROBLEMAS -->
@@ -59,7 +59,7 @@
             Solução
         </a>
 
-        <button class="ac-btn na" onclick="toggleAC(this)">NA</button>
+        <button class="ac-btn na" data-key="busca_binaria:prob:roadworks" data-kind="problem" data-label="Problema 1 - Roadworks">NA</button>
     </div>
 
     <!-- PROBLEMA 2 -->
@@ -72,7 +72,7 @@
             Solução
         </a>
 
-        <button class="ac-btn na" onclick="toggleAC(this)">NA</button>
+        <button class="ac-btn na" data-key="busca_binaria:prob:nome-2" data-kind="problem" data-label="Problema 2 - Nome 2">NA</button>
     </div>
 
     <!-- PROBLEMA 3 -->
@@ -85,36 +85,13 @@
             Solução
         </a>
 
-        <button class="ac-btn na" onclick="toggleAC(this)">NA</button>
+        <button class="ac-btn na" data-key="busca_binaria:prob:nome-3" data-kind="problem" data-label="Problema 3 - Nome 3">NA</button>
     </div>
 
 </div>
 
-<script>
-function toggleStatus(btn){
-    if(btn.classList.contains("pending")){
-        btn.classList.remove("pending");
-        btn.classList.add("done");
-        btn.textContent = "Lido";
-    }else{
-        btn.classList.remove("done");
-        btn.classList.add("pending");
-        btn.textContent = "Pendente";
-    }
-}
-
-function toggleAC(btn){
-    if(btn.classList.contains("na")){
-        btn.classList.remove("na");
-        btn.classList.add("ac");
-        btn.textContent = "AC";
-    }else{
-        btn.classList.remove("ac");
-        btn.classList.add("na");
-        btn.textContent = "NA";
-    }
-}
-</script>
+<!-- Persist the read/solved toggles per logged-in user (visual-only for guests). -->
+<script src="./progress.js"></script>
 
 </body>
 </html>
