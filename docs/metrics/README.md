@@ -32,7 +32,7 @@ Registro das métricas de **complexidade** e **manutenibilidade** do backend
 | Milestone               | Data       | Arquivos | SLOC | CC média  | MI         | Pylint   | Relatório |
 | ----------------------- | ---------- | -------- | ---- | --------- | ---------- | -------- | --------- |
 | 1 — Autenticação        | 2026-06-28 | 1        | 87   | A (2,44)  | A (57,5)   | 9,05/10  | [milestone-1-auth.md](milestone-1-auth.md) |
-| 2 — Progresso + painel  | _ao mesclar os PRs_ | | | | | | |
+| 2 — Progresso + painel  | 2026-06-28 | 1        | 143  | A (2,91)  | A (51,9)   | 9,25/10  | [milestone-2-progress.md](milestone-2-progress.md) |
 
 > A cada entrega: rode o script (ou baixe o artefato do CI), salve
 > `docs/metrics/milestone-N.md`, acrescente uma linha aqui e copie para a wiki.
@@ -76,3 +76,32 @@ Metas simples para acompanhar entre milestones:
 Compare a tabela acima a cada entrega e comente os desvios (ex.: uma função que
 virou C, ou queda do MI ao adicionar features) — é exatamente a discussão de
 engenharia de software pedida pela disciplina.
+
+## Evolução — milestone 1 → 2
+
+A entrega 2 adicionou os endpoints de progresso (`GET`/`POST /progress`) e a tabela
+`progress`, tudo no mesmo `app.py`. O efeito nas métricas foi o **previsto** no
+milestone 1:
+
+| Métrica  | M1 (auth) | M2 (progresso) | Variação |
+| -------- | --------- | -------------- | -------- |
+| SLOC     | 87        | 143            | +56      |
+| CC média | A (2,44)  | A (2,91)       | +0,47    |
+| MI       | A (57,5)  | A (51,9)       | −5,6     |
+| Pylint   | 9,05/10   | 9,25/10        | +0,20    |
+
+- **MI caiu (57,5 → 51,9), como antecipado.** O backend continua sendo um único
+  arquivo; cada rota nova soma volume (Halstead) e linhas ao mesmo módulo, e o índice
+  de manutenibilidade reage a isso. Ainda está no rank **A**, mas a tendência confirma
+  o ponto de atenção: ao crescer mais (conteúdo, admin), vale **separar em
+  blueprints** (`auth`, `progress`, acesso a banco) para recuperar o MI.
+- **CC subiu de leve (2,44 → 2,91).** O `set_progress` traz validação e o `UPSERT`,
+  somando ramos; nada chega a C, então o código segue fácil de testar.
+- **Pylint melhorou (9,05 → 9,25).** As funções novas já vieram com docstrings, então
+  a proporção de avisos caiu. O teto continua sendo as poucas docstrings ausentes nos
+  handlers antigos — um ajuste barato para chegar perto de 10.
+
+**Leitura de engenharia:** as features novas mantiveram a saúde do código (CC e MI no
+rank A, pylint acima de 9), mas a queda do MI é o primeiro sinal mensurável de que a
+arquitetura de arquivo único tem prazo de validade. A próxima refatoração para módulos
+deve ser avaliada quando o MI se aproximar do limite do rank A.
