@@ -1,5 +1,7 @@
-# Dev-only tools for code metrics (not needed to run the app).
+# Dev-only tools (not needed to run the app).
 #   radon  -> cyclomatic complexity, maintainability index, raw metrics, Halstead
 #   pylint -> static analysis + a 0-10 quality score
+#   pytest -> test runner for backend/tests/
 radon
 pylint
+pytest
