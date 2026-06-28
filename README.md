@@ -16,6 +16,8 @@ projeto-maratona/
 │   ├── index.css           # estilos da homepage (com tokens de tema)
 │   ├── busca_binaria.html  # página de conteúdo (tema + referências + problemas)
 │   ├── solucao.html        # página de solução de um problema
+│   ├── painel.html         # dashboard: progresso do usuário logado
+│   ├── progress.js         # persiste os toggles "lido/resolvido" por usuário
 │   ├── base.css            # cabeçalho/identidade visual compartilhada
 │   ├── conteudo.css
 │   └── solucao.css
@@ -47,6 +49,8 @@ start e é ignorado pelo Git. Defina `SECRET_KEY` no ambiente para produção.
 | POST   | `/login`     | `{username, password}` → inicia a sessão; `401` se inválido |
 | POST   | `/logout`    | Encerra a sessão                                      |
 | GET    | `/me`        | Protegida — retorna o usuário logado, ou `401`        |
+| GET    | `/progress`  | Protegida — progresso do usuário, mapa por `item_key` |
+| POST   | `/progress`  | Protegida — salva `{item_key, kind, label, done}`     |
 
 As senhas são guardadas com hash (`werkzeug.security`) e a sessão usa cookie
 assinado do Flask.
@@ -57,3 +61,19 @@ As páginas em `frontend/` usam links relativos (CSS e navegação) e são servi
 pelo Flask na mesma origem da API — isso é o que faz o cookie de sessão do login
 funcionar nas chamadas a `/me`. A homepage (`/`) é o ponto de entrada; as demais
 páginas (ex.: `/busca_binaria.html`) também são servidas pelo backend.
+
+## Progresso de estudos
+
+Nas páginas de conteúdo, os botões "Pendente/Lido" (referências) e "NA/AC"
+(problemas) **persistem por usuário** quando há sessão ativa — sem login, eles
+funcionam só visualmente. A lógica fica em `progress.js`: ao carregar a página ele
+busca `GET /progress` e reflete o estado salvo; ao clicar, salva via `POST /progress`.
+
+Cada botão declara três atributos que identificam o item de forma estável:
+
+- `data-key` — id único, padrão `"<página>:<tipo>:<slug>"` (ex.: `busca_binaria:prob:roadworks`)
+- `data-kind` — `ref` (referência/leitura) ou `problem` (resolvido)
+- `data-label` — texto exibido no painel (ex.: `Problema 1 - Roadworks`)
+
+A página `painel.html` lê `GET /progress` e mostra o que o usuário marcou, agrupado
+em "Problemas resolvidos" e "Referências lidas".
