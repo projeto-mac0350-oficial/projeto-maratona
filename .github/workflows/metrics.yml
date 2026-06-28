@@ -1,0 +1,41 @@
+name: Code Metrics
+
+# Collect backend complexity & maintainability metrics (radon + pylint) on every
+# push to main and on PRs. The report is shown in the run's Summary tab and saved
+# as a downloadable artifact — copy it to the project wiki per milestone.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  metrics:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install tools
+        run: |
+          python -m pip install --upgrade pip
+          # Install the app deps too so pylint can resolve imports (e.g. flask).
+          pip install -r backend/requirements.txt
+          pip install -r backend/requirements-dev.txt
+
+      - name: Collect metrics
+        run: bash scripts/metrics.sh backend | tee metrics-report.md
+
+      - name: Publish report to job summary
+        if: always()
+        run: cat metrics-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload metrics report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: metrics-report
+          path: metrics-report.md
