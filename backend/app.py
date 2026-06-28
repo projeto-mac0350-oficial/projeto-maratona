@@ -26,7 +26,7 @@ def get_db():
 
 
 def init_db():
-    """Create the users table if it doesn't exist yet (idempotent)."""
+    """Create the tables if they don't exist yet (idempotent)."""
     with closing(get_db()) as db:
         db.execute(
             """
@@ -34,6 +34,23 @@ def init_db():
                 id            INTEGER PRIMARY KEY AUTOINCREMENT,
                 username      TEXT UNIQUE NOT NULL,
                 password_hash TEXT NOT NULL
+            )
+            """
+        )
+        # Per-user study progress. The content pages are static, so they supply
+        # the item identity (item_key) and a human label; the backend just stores
+        # the checked/unchecked state per user. kind ("ref" | "problem") lets the
+        # dashboard group items without needing a content data model.
+        db.execute(
+            """
+            CREATE TABLE IF NOT EXISTS progress (
+                user_id    INTEGER NOT NULL REFERENCES users(id),
+                item_key   TEXT    NOT NULL,
+                kind       TEXT    NOT NULL,
+                label      TEXT,
+                done       INTEGER NOT NULL DEFAULT 0,
+                updated_at TEXT    NOT NULL DEFAULT (datetime('now')),
+                PRIMARY KEY (user_id, item_key)
             )
             """
         )
@@ -126,6 +143,57 @@ def logout():
 @login_required
 def me():
     return jsonify(id=session["user_id"], username=session["username"])
+
+
+@app.get("/progress")
+@login_required
+def get_progress():
+    """Return the current user's progress as a map keyed by item_key."""
+    with closing(get_db()) as db:
+        rows = db.execute(
+            "SELECT item_key, kind, label, done FROM progress WHERE user_id = ?",
+            (session["user_id"],),
+        ).fetchall()
+    return jsonify(
+        {
+            row["item_key"]: {
+                "done": bool(row["done"]),
+                "kind": row["kind"],
+                "label": row["label"],
+            }
+            for row in rows
+        }
+    )
+
+
+@app.post("/progress")
+@login_required
+def set_progress():
+    """Upsert the done state for one item; the client sends the desired state."""
+    data = request.get_json(silent=True) or {}
+    item_key = (data.get("item_key") or "").strip()
+    kind = (data.get("kind") or "").strip()
+    label = (data.get("label") or "").strip()
+    done = 1 if data.get("done") else 0
+    if not item_key or not kind:
+        return jsonify(error="item_key and kind are required"), 400
+
+    with closing(get_db()) as db:
+        db.execute(
+            """
+            INSERT INTO progress (user_id, item_key, kind, label, done, updated_at)
+            VALUES (?, ?, ?, ?, ?, datetime('now'))
+            ON CONFLICT(user_id, item_key) DO UPDATE SET
+                done       = excluded.done,
+                label      = excluded.label,
+                kind       = excluded.kind,
+                updated_at = excluded.updated_at
+            """,
+            (session["user_id"], item_key, kind, label, done),
+        )
+        db.commit()
+
+    return jsonify(item_key=item_key, done=bool(done))
 
 
 # Ensure the schema exists for both `python app.py` and `flask run`.
