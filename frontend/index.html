@@ -7,6 +7,7 @@
 
     <link rel="stylesheet" href="./base.css">
     <link rel="stylesheet" href="./index.css">
+    <link rel="stylesheet" href="./auth-widget.css">
 
     <!-- Apply the saved theme before first paint to avoid a flash. -->
     <script>
@@ -26,13 +27,8 @@
 
     <nav class="barra-navegacao">
         <div class="head_botoes">
-            <!-- Visitante: botão de login no canto superior -->
-            <button id="signin-btn" type="button">Entrar</button>
-
-            <!-- Logado: saudação + sair (escondidos até logar) -->
-            <span id="user-greeting" class="user-greeting hidden">Olá, <strong id="header-username"></strong></span>
-            <button id="logout-btn" class="hidden" type="button">Sair</button>
-
+            <!-- Login/logout control injected by auth-widget.js -->
+            <span id="auth-controls"></span>
             <button id="theme-toggle" type="button">🌙 Escuro</button>
         </div>
     </nav>
@@ -66,47 +62,6 @@
     </div>
 </main>
 
-<!-- LOGIN / REGISTER — modal aberto pelo botão "Entrar" do cabeçalho -->
-<dialog class="auth-dialog" id="auth-dialog">
-    <form method="dialog" class="auth-dialog-head">
-        <h2>Acesse sua conta</h2>
-        <button class="dialog-close" type="submit" aria-label="Fechar">✕</button>
-    </form>
-
-    <div class="auth-tabs">
-        <button class="auth-tab active" type="button" data-target="login">Entrar</button>
-        <button class="auth-tab" type="button" data-target="register">Criar conta</button>
-    </div>
-
-    <!-- LOGIN -->
-    <form class="auth-form" id="login-form" novalidate>
-        <div class="field">
-            <label for="login-username">Usuário</label>
-            <input id="login-username" name="username" type="text" autocomplete="username" required>
-        </div>
-        <div class="field">
-            <label for="login-password">Senha</label>
-            <input id="login-password" name="password" type="password" autocomplete="current-password" required>
-        </div>
-        <button class="btn-primary" type="submit">Entrar</button>
-        <p class="form-msg" id="login-msg" role="status" aria-live="polite"></p>
-    </form>
-
-    <!-- REGISTER -->
-    <form class="auth-form hidden" id="register-form" novalidate>
-        <div class="field">
-            <label for="register-username">Usuário</label>
-            <input id="register-username" name="username" type="text" autocomplete="username" required>
-        </div>
-        <div class="field">
-            <label for="register-password">Senha</label>
-            <input id="register-password" name="password" type="password" autocomplete="new-password" required>
-        </div>
-        <button class="btn-primary" type="submit">Criar conta</button>
-        <p class="form-msg" id="register-msg" role="status" aria-live="polite"></p>
-    </form>
-</dialog>
-
 <footer class="site-footer">
     Projeto Maratona — MAC0350
 </footer>
@@ -131,185 +86,21 @@ themeToggle.addEventListener("click", () => {
 
 refreshThemeLabel();
 
-/* --- Modal de login (botão "Entrar" no cabeçalho) ------------------------ */
-const authDialog = document.getElementById("auth-dialog");
-const signinBtn = document.getElementById("signin-btn");
-
-signinBtn.addEventListener("click", () => {
-    if (typeof authDialog.showModal === "function") {
-        authDialog.showModal();
-    } else {
-        authDialog.setAttribute("open", "");
-    }
-});
-
-// Fecha ao clicar fora do conteúdo (na área do backdrop).
-authDialog.addEventListener("click", (e) => {
-    if (e.target === authDialog) authDialog.close();
-});
-
-/* --- Alternância Entrar / Criar conta ------------------------------------ */
-const tabs = document.querySelectorAll(".auth-tab");
-const authForms = {
-    login: document.getElementById("login-form"),
-    register: document.getElementById("register-form"),
-};
-
-tabs.forEach((tab) => {
-    tab.addEventListener("click", () => {
-        tabs.forEach((t) => t.classList.remove("active"));
-        tab.classList.add("active");
-        const target = tab.dataset.target;
-        Object.entries(authForms).forEach(([name, form]) => {
-            form.classList.toggle("hidden", name !== target);
-        });
-    });
-});
-
-/* --- Helpers ------------------------------------------------------------- */
-function showMessage(el, text, type) {
-    el.textContent = text;
-    el.className = "form-msg" + (type ? " " + type : "");
-}
-
-async function postJSON(path, body) {
-    const res = await fetch(path, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-        credentials: "same-origin",
-    });
-    let data = {};
-    try {
-        data = await res.json();
-    } catch (e) {
-        /* empty / non-JSON body */
-    }
-    return { ok: res.ok, status: res.status, data };
-}
-
-/* --- Estado: logado vs. visitante ---------------------------------------- */
+/* --- Painel do usuário: reage ao login/logout do auth-widget -------------- */
 const accountCard = document.getElementById("account-card");
-const userGreeting = document.getElementById("user-greeting");
-const headerUsername = document.getElementById("header-username");
-const logoutBtn = document.getElementById("logout-btn");
 
-function showLoggedIn(username) {
-    document.getElementById("account-username").textContent = username;
-    headerUsername.textContent = username;
-    // Cabeçalho: troca "Entrar" por saudação + "Sair".
-    signinBtn.classList.add("hidden");
-    userGreeting.classList.remove("hidden");
-    logoutBtn.classList.remove("hidden");
-    accountCard.classList.remove("hidden");
-    if (authDialog.open) authDialog.close();
-}
-
-function showLoggedOut() {
-    signinBtn.classList.remove("hidden");
-    userGreeting.classList.add("hidden");
-    logoutBtn.classList.add("hidden");
-    accountCard.classList.add("hidden");
-}
-
-/* --- Login --------------------------------------------------------------- */
-const loginForm = authForms.login;
-const loginMsg = document.getElementById("login-msg");
-
-loginForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const username = loginForm.username.value.trim();
-    const password = loginForm.password.value;
-    if (!username || !password) {
-        showMessage(loginMsg, "Preencha usuário e senha.", "error");
-        return;
-    }
-
-    const button = loginForm.querySelector("button[type=submit]");
-    button.disabled = true;
-    showMessage(loginMsg, "Entrando...", null);
-    try {
-        const { ok, status, data } = await postJSON("/login", { username, password });
-        if (ok) {
-            loginForm.reset();
-            showMessage(loginMsg, "", null);
-            showLoggedIn(data.username);
-        } else if (status === 401) {
-            showMessage(loginMsg, "Usuário ou senha inválidos.", "error");
-        } else {
-            showMessage(loginMsg, data.error || "Falha ao entrar.", "error");
-        }
-    } catch (err) {
-        showMessage(loginMsg, "Não foi possível conectar ao servidor.", "error");
-    } finally {
-        button.disabled = false;
+window.addEventListener("auth:change", (e) => {
+    const user = e.detail.user;
+    if (user) {
+        document.getElementById("account-username").textContent = user.username;
+        accountCard.classList.remove("hidden");
+    } else {
+        accountCard.classList.add("hidden");
     }
 });
-
-/* --- Registro (cria a conta e já entra) ---------------------------------- */
-const registerForm = authForms.register;
-const registerMsg = document.getElementById("register-msg");
-
-registerForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const username = registerForm.username.value.trim();
-    const password = registerForm.password.value;
-    if (!username || !password) {
-        showMessage(registerMsg, "Preencha usuário e senha.", "error");
-        return;
-    }
-
-    const button = registerForm.querySelector("button[type=submit]");
-    button.disabled = true;
-    showMessage(registerMsg, "Criando conta...", null);
-    try {
-        const reg = await postJSON("/register", { username, password });
-        if (!reg.ok) {
-            const msg = reg.status === 409
-                ? "Esse usuário já existe. Escolha outro."
-                : reg.data.error || "Falha ao criar conta.";
-            showMessage(registerMsg, msg, "error");
-            return;
-        }
-        // Conta criada: faz login automático para já entrar.
-        const login = await postJSON("/login", { username, password });
-        if (login.ok) {
-            registerForm.reset();
-            showMessage(registerMsg, "", null);
-            showLoggedIn(login.data.username);
-        } else {
-            showMessage(registerMsg, "Conta criada. Faça login para entrar.", "success");
-        }
-    } catch (err) {
-        showMessage(registerMsg, "Não foi possível conectar ao servidor.", "error");
-    } finally {
-        button.disabled = false;
-    }
-});
-
-/* --- Logout -------------------------------------------------------------- */
-logoutBtn.addEventListener("click", async () => {
-    try {
-        await fetch("/logout", { method: "POST", credentials: "same-origin" });
-    } catch (err) {
-        /* ignore: limpamos a UI de qualquer forma */
-    }
-    showLoggedOut();
-});
-
-/* --- Sessão existente ao abrir a página ---------------------------------- */
-(async () => {
-    try {
-        const res = await fetch("/me", { credentials: "same-origin" });
-        if (res.ok) {
-            const data = await res.json();
-            showLoggedIn(data.username);
-        }
-    } catch (err) {
-        /* sem backend / sem sessão: segue como visitante */
-    }
-})();
 </script>
+
+<script src="./auth-widget.js"></script>
 
 </body>
 </html>
