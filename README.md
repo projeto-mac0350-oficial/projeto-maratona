@@ -77,6 +77,8 @@ O conteúdo de estudo vem do banco (tabelas `topics`/`topic_items`, populadas po
 `SEED_CONTENT` em `app.py`): `topic.html` lê o `slug` da query string, busca
 `GET /topics/<slug>` e monta a página. Cada item já traz o `item_key` e o `label`
 usados pelo `progress.js`, então os toggles persistem como nas páginas estáticas.
+Cada problema também traz uma `difficulty` (`easy`/`medium`/`hard`) que vira a
+barra de cor (verde/amarelo/vermelho) ao lado do título.
 
 ## Progresso de estudos
 

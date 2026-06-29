@@ -69,6 +69,23 @@ def test_get_unknown_topic_is_404(client):
     assert client.get("/topics/does-not-exist").status_code == 404
 
 
+# --- difficulty ------------------------------------------------------------
+
+
+def test_problems_expose_their_difficulty(client):
+    data = client.get("/topics/busca_binaria").get_json()
+    by_slug = {p["slug"]: p for p in data["problems"]}
+    assert by_slug["roadworks"]["difficulty"] == "easy"
+    assert by_slug["nome-2"]["difficulty"] == "medium"
+    assert by_slug["nome-3"]["difficulty"] == "hard"
+
+
+def test_references_have_no_difficulty(client):
+    data = client.get("/topics/busca_binaria").get_json()
+    cp = next(r for r in data["references"] if r["slug"] == "cp-algorithms")
+    assert "difficulty" not in cp
+
+
 # --- content keys line up with the progress API ----------------------------
 
 

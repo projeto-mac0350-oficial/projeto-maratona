@@ -79,11 +79,17 @@ def init_db():
                 title        TEXT    NOT NULL,
                 url          TEXT,               -- reference / problem-statement link
                 solution_url TEXT,               -- problems only
+                difficulty   TEXT,               -- problems only: 'easy' | 'medium' | 'hard'
                 position     INTEGER NOT NULL DEFAULT 0,
                 UNIQUE (topic_id, kind, slug)
             )
             """
         )
+        # Lightweight migration: add columns introduced after a DB was first
+        # created (CREATE TABLE IF NOT EXISTS won't alter an existing table).
+        existing = {row["name"] for row in db.execute("PRAGMA table_info(topic_items)")}
+        if "difficulty" not in existing:
+            db.execute("ALTER TABLE topic_items ADD COLUMN difficulty TEXT")
         db.commit()
     seed_content()
 
@@ -122,18 +128,21 @@ SEED_CONTENT = [
                 "title": "Roadworks",
                 "url": "https://codeforces.com/problemset/problem/2229/G?mobile=true",
                 "solution_url": "solucao.html",
+                "difficulty": "easy",
             },
             {
                 "slug": "nome-2",
                 "title": "Nome 2",
                 "url": None,
                 "solution_url": "solucao.html",
+                "difficulty": "medium",
             },
             {
                 "slug": "nome-3",
                 "title": "Nome 3",
                 "url": "https://codeforces.com/problemset/problem/1/C",
                 "solution_url": "solucao.html",
+                "difficulty": "hard",
             },
         ],
     },
@@ -163,12 +172,13 @@ def seed_content():
                     db.execute(
                         """
                         INSERT INTO topic_items
-                            (topic_id, kind, slug, title, url, solution_url, position)
-                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                            (topic_id, kind, slug, title, url, solution_url, difficulty, position)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                         ON CONFLICT(topic_id, kind, slug) DO UPDATE SET
                             title        = excluded.title,
                             url          = excluded.url,
                             solution_url = excluded.solution_url,
+                            difficulty   = excluded.difficulty,
                             position     = excluded.position
                         """,
                         (
@@ -178,6 +188,7 @@ def seed_content():
                             item["title"],
                             item.get("url"),
                             item.get("solution_url"),
+                            item.get("difficulty"),
                             i_pos,
                         ),
                     )
@@ -345,6 +356,7 @@ def _serialize_item(topic_slug, row):
     }
     if row["kind"] == "problem":
         item["solution_url"] = row["solution_url"]
+        item["difficulty"] = row["difficulty"]
     return item
 
 
@@ -369,7 +381,7 @@ def get_topic(slug):
             return jsonify(error="topic not found"), 404
         items = db.execute(
             """
-            SELECT kind, slug, title, url, solution_url, position
+            SELECT kind, slug, title, url, solution_url, difficulty, position
             FROM topic_items WHERE topic_id = ? ORDER BY position, id
             """,
             (topic["id"],),

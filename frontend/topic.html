@@ -123,12 +123,20 @@
         document.getElementById("refs-section").hidden = false;
     }
 
-    // Problems
+    // Problems. The leading bar colors the difficulty (green/yellow/red).
+    const DIFFICULTY_COLOR = { easy: "green", medium: "yellow", hard: "red" };
     if (topic.problems.length) {
         const problemsEl = document.getElementById("problems");
         topic.problems.forEach((problem) => {
             const box = document.createElement("div");
             box.className = "problem-box";
+            const color = DIFFICULTY_COLOR[problem.difficulty];
+            if (color) {
+                const bar = document.createElement("div");
+                bar.className = "color-bar " + color;
+                bar.title = problem.difficulty;
+                box.appendChild(bar);
+            }
             box.appendChild(makeTitle(problem.label, problem.url, "problem-title-link"));
             if (problem.solution_url) {
                 const sol = document.createElement("a");
