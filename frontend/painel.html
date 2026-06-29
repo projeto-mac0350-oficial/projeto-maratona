@@ -7,6 +7,7 @@
 
     <link rel="stylesheet" href="./base.css">
     <link rel="stylesheet" href="./index.css">
+    <link rel="stylesheet" href="./auth-widget.css">
 
     <!-- Apply the saved theme before first paint to avoid a flash. -->
     <script>
@@ -66,6 +67,7 @@
 
     <nav class="barra-navegacao">
         <div class="head_botoes">
+            <span id="auth-controls"></span>
             <button id="theme-toggle" type="button">🌙 Escuro</button>
         </div>
     </nav>
@@ -77,10 +79,8 @@
         <!-- VISITANTE (sem sessão) -->
         <section class="card hidden" id="guest-card">
             <h2 class="section-heading">Meu painel</h2>
-            <p>Entre na sua conta para acompanhar o seu progresso de estudos.</p>
-            <div class="account-actions">
-                <a class="btn-link" href="index.html">Ir para o login</a>
-            </div>
+            <p>Use o botão <strong>Entrar</strong> no topo para acessar a sua conta
+               e acompanhar o seu progresso de estudos.</p>
         </section>
 
         <!-- LOGADO -->
@@ -162,24 +162,8 @@ function render(progress) {
         `${problems.length} problema(s) resolvido(s) · ${refs.length} referência(s) lida(s)`;
 }
 
-/* --- Carrega sessão e progresso ------------------------------------------ */
-(async () => {
-    let me = null;
-    try {
-        const res = await fetch("/me", { credentials: "same-origin" });
-        if (res.ok) me = await res.json();
-    } catch (err) {
-        /* sem backend: trata como visitante */
-    }
-
-    if (!me) {
-        document.getElementById("guest-card").classList.remove("hidden");
-        return;
-    }
-
-    document.getElementById("painel-username").textContent = me.username;
-    document.getElementById("painel-content").classList.remove("hidden");
-
+/* --- Sessão (via auth-widget) + progresso -------------------------------- */
+async function loadProgress() {
     let progress = {};
     try {
         const res = await fetch("/progress", { credentials: "same-origin" });
@@ -188,8 +172,27 @@ function render(progress) {
         /* mantém vazio */
     }
     render(progress);
-})();
+}
+
+// O auth-widget verifica a sessão (GET /me) e dispara "auth:change" no load e
+// sempre que o usuário entra/sai — então o painel reage sem chamar /me.
+window.addEventListener("auth:change", (e) => {
+    const user = e.detail.user;
+    const guest = document.getElementById("guest-card");
+    const content = document.getElementById("painel-content");
+    if (user) {
+        document.getElementById("painel-username").textContent = user.username;
+        guest.classList.add("hidden");
+        content.classList.remove("hidden");
+        loadProgress();
+    } else {
+        content.classList.add("hidden");
+        guest.classList.remove("hidden");
+    }
+});
 </script>
+
+<script src="./auth-widget.js"></script>
 
 </body>
 </html>

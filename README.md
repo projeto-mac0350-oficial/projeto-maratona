@@ -19,6 +19,8 @@ projeto-maratona/
 │   ├── solucao.html        # página de solução de um problema
 │   ├── painel.html         # dashboard: progresso do usuário logado
 │   ├── progress.js         # persiste os toggles "lido/resolvido" por usuário
+│   ├── auth-widget.js      # controle de login/logout compartilhado (botão + modal)
+│   ├── auth-widget.css     # estilos do controle de login (tokens com fallback)
 │   ├── base.css            # cabeçalho/identidade visual compartilhada
 │   ├── conteudo.css
 │   └── solucao.css
@@ -64,6 +66,12 @@ As páginas em `frontend/` usam links relativos (CSS e navegação) e são servi
 pelo Flask na mesma origem da API — isso é o que faz o cookie de sessão do login
 funcionar nas chamadas a `/me`. A homepage (`/`) é o ponto de entrada; as demais
 páginas (ex.: `/topic.html?topic=busca_binaria`) também são servidas pelo backend.
+
+O controle de login no canto superior (botão **Entrar** → modal, ou saudação +
+**Sair**) é o mesmo em todas as páginas: vem de `auth-widget.js`/`auth-widget.css`.
+Cada página só inclui esses dois arquivos e coloca `<span id="auth-controls"></span>`
+no cabeçalho; o widget verifica a sessão (`GET /me`), injeta o modal e dispara um
+evento `auth:change` que as páginas usam para mostrar/ocultar a área do usuário.
 
 O conteúdo de estudo vem do banco (tabelas `topics`/`topic_items`, populadas por
 `SEED_CONTENT` em `app.py`): `topic.html` lê o `slug` da query string, busca

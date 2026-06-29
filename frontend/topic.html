@@ -7,9 +7,19 @@
 
     <link rel="stylesheet" href="./base.css">
     <link rel="stylesheet" href="./conteudo.css">
+    <link rel="stylesheet" href="./auth-widget.css">
 </head>
 
 <body>
+
+<header>
+    <h1>Projeto Maratona</h1>
+    <nav class="barra-navegacao">
+        <div class="head_botoes">
+            <span id="auth-controls"></span>
+        </div>
+    </nav>
+</header>
 
 <div class="bb" id="topic">
     <p class="topic-back"><a href="/">← Início</a></p>
@@ -141,6 +151,8 @@
     document.body.appendChild(script);
 })();
 </script>
+
+<script src="./auth-widget.js"></script>
 
 </body>
 </html>
