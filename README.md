@@ -19,6 +19,7 @@ projeto-maratona/
 │   ├── solucao.html        # página de solução de um problema
 │   ├── painel.html         # dashboard: progresso do usuário logado
 │   ├── progress.js         # persiste os toggles "lido/resolvido" por usuário
+│   ├── calendar.js         # mini calendário: dias logados no mês + sequência (homepage)
 │   ├── auth-widget.js      # controle de login/logout compartilhado (botão + modal)
 │   ├── auth-widget.css     # estilos do controle de login (tokens com fallback)
 │   ├── base.css            # cabeçalho/identidade visual compartilhada
@@ -73,6 +74,12 @@ O controle de login no canto superior (botão **Entrar** → modal, ou saudaçã
 Cada página só inclui esses dois arquivos e coloca `<span id="auth-controls"></span>`
 no cabeçalho; o widget verifica a sessão (`GET /me`), injeta o modal e dispara um
 evento `auth:change` que as páginas usam para mostrar/ocultar a área do usuário.
+
+Na homepage, a área do usuário logado mostra um **mini calendário** do mês
+(`calendar.js`): cada visita autenticada registra o dia (o backend grava em
+`/login` e `/me`, e `GET /activity` devolve os dias do mês + a sequência), os
+dias registrados aparecem marcados, o dia atual destacado e a **sequência** —
+dias seguidos de acesso — logo abaixo. Sem login o calendário não aparece.
 
 O conteúdo de estudo vem do banco (tabelas `topics`/`topic_items`, populadas por
 `SEED_CONTENT` em `app.py`): `topic.html` lê o `slug` da query string, busca
