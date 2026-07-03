@@ -54,6 +54,7 @@ start e é ignorado pelo Git. Defina `SECRET_KEY` no ambiente para produção.
 | GET    | `/me`        | Protegida — retorna o usuário logado, ou `401`        |
 | GET    | `/progress`  | Protegida — progresso do usuário, mapa por `item_key` |
 | POST   | `/progress`  | Protegida — salva `{item_key, kind, label, done}`     |
+| GET    | `/activity`  | Protegida — registra o dia e retorna `{today, streak, days}` (dias logados no mês) |
 | GET    | `/topics`    | Lista de tópicos de estudo (`slug`, `title`, `summary`) |
 | GET    | `/topics/<slug>` | Um tópico com `references` e `problems`; `404` se não existe |
 

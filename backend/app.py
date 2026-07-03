@@ -1,6 +1,7 @@
 import os
 import sqlite3
 from contextlib import closing
+from datetime import date, timedelta
 from functools import wraps
 
 from flask import Flask, jsonify, request, session
@@ -51,6 +52,19 @@ def init_db():
                 done       INTEGER NOT NULL DEFAULT 0,
                 updated_at TEXT    NOT NULL DEFAULT (datetime('now')),
                 PRIMARY KEY (user_id, item_key)
+            )
+            """
+        )
+        # One row per (user, calendar day) the user was seen authenticated —
+        # recorded on login and on /me, so staying logged in via the session
+        # cookie still counts. Day is the server-local date ('YYYY-MM-DD');
+        # powers the homepage mini calendar and the streak.
+        db.execute(
+            """
+            CREATE TABLE IF NOT EXISTS login_days (
+                user_id INTEGER NOT NULL REFERENCES users(id),
+                day     TEXT    NOT NULL,
+                PRIMARY KEY (user_id, day)
             )
             """
         )
@@ -207,6 +221,26 @@ def login_required(view):
     return wrapped
 
 
+def record_login_day(user_id):
+    """Mark today (server-local) as a day this user was active (idempotent)."""
+    with closing(get_db()) as db:
+        db.execute(
+            "INSERT OR IGNORE INTO login_days (user_id, day) VALUES (?, ?)",
+            (user_id, date.today().isoformat()),
+        )
+        db.commit()
+
+
+def compute_streak(days, today):
+    """Count consecutive days ending at `today` present in `days` (ISO strings)."""
+    streak = 0
+    d = today
+    while d.isoformat() in days:
+        streak += 1
+        d -= timedelta(days=1)
+    return streak
+
+
 # --- Pages -----------------------------------------------------------------
 
 
@@ -268,6 +302,7 @@ def login():
     session.clear()
     session["user_id"] = user["id"]
     session["username"] = user["username"]
+    record_login_day(user["id"])
     return jsonify(username=user["username"])
 
 
@@ -280,7 +315,28 @@ def logout():
 @app.get("/me")
 @login_required
 def me():
+    record_login_day(session["user_id"])
     return jsonify(id=session["user_id"], username=session["username"])
+
+
+@app.get("/activity")
+@login_required
+def get_activity():
+    """Record today's visit; return this month's logged-in days + streak."""
+    user_id = session["user_id"]
+    record_login_day(user_id)
+    today = date.today()
+    with closing(get_db()) as db:
+        rows = db.execute(
+            "SELECT day FROM login_days WHERE user_id = ?", (user_id,)
+        ).fetchall()
+    all_days = {row["day"] for row in rows}
+    month_prefix = today.strftime("%Y-%m-")
+    return jsonify(
+        today=today.isoformat(),
+        streak=compute_streak(all_days, today),
+        days=sorted(d for d in all_days if d.startswith(month_prefix)),
+    )
 
 
 @app.get("/progress")
