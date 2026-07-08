@@ -2,9 +2,9 @@
    Roadmap
    ====================== */
 .roadmap {
-    max-width: 1000px;
-    margin: 0 auto;
+    max-width: 1200px;
     padding: 3rem 2rem 6rem;
+    margin: 0 40px;
 }
 
 .roadmap h1 {
@@ -35,7 +35,7 @@
 
     padding: 1.2rem 1.5rem;
 
-    background: white;
+    background: var(--card-bg);
 
     border: 1px solid var(--border);
     border-radius: 12px;

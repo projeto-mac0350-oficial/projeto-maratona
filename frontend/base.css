@@ -4,12 +4,13 @@
 }
 
 html, body{
-    height: 100%;
+    min-height: 100%;
 }
 
 body{
     display: flex;
     flex-direction: column;
+    min-height: 100vh;
     font-family: 'Roboto', sans-serif;
 }
 
@@ -17,66 +18,21 @@ main{
     flex: 1;
     display: flex;
     flex-direction: column;
-    min-height: 80vh;
     width: 100%;
-}
-
-header{
-    background-color: #E64F2E;
-    color: white;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    padding: 1vh;
-    height: 7vh;
 }
 
 header h1{
     margin: 0;
-    font-size: 2.1rem;
+    font-size: 1.7rem;
 }
 
-.barra-navegacao{
-    display: flex;
-    flex-wrap: wrap;
+header  a {
+    margin: 0;
+    font-size: 1.7rem;
+    text-decoration: none;
+    color: inherit; 
 }
 
-.head_botoes button{
-    background-color: #E64F2E;
-    color: white;
-    font-size: 0.86rem;
-    padding: 1.5vh 2.3vh;
-    border: none;
-
-    border-radius: 10px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.head_botoes button:hover{
-    background-color: #FFB7D5;
-}
-
-main .container1 button,
-main .container2 button,
-main .container3 button,
-main .conteiner4 button,
-main .botoes-pag button{
-    background-color: wheat;
-    font-size: 1rem;
-    padding: 1.5vh 2.3vh;
-    border: none;
-
-    border-radius: 10px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-main .container1 button:hover,
-main .container2 button:hover,
-main .container3 button:hover,
-main .conteiner4 button:hover,
-main .botoes-pag button:hover{
-    background-color: #FFB7D5;
+#conteudo{
+    width: 100%;
 }

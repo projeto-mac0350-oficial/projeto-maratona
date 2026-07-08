@@ -133,10 +133,10 @@ header h1 {
 
 /* --- Layout --------------------------------------------------------------- */
 .home {
-    max-width: 1000px;
+    max-width: 1200px;
     width: 100%;
-    margin: 40px auto; 
-    padding: 0 20px;
+    margin: 40px 0; 
+    padding: 0 40px;
     box-sizing: border-box;
 }
 
@@ -297,7 +297,7 @@ header h1 {
 }
 
 .hidden {
-    display: none;
+    display: none !important;
 }
 
 /* --- Responsivo -------------------------------------------------------------- */

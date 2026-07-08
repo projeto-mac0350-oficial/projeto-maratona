@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}
+MaratonUSP Ensina - Nível Júnior
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="pagina_logado.css">
+{% endblock %}
+
+{% block content %}
+
+<!-- VISITANTE (sem sessão) -->
+<section class="card hidden" id="guest-card">
+    <h2 class="section-heading">Meu painel</h2>
+    <p>Use o botão <strong>Entrar</strong> no topo para acessar a sua conta
+        e acompanhar o seu progresso de estudos.</p>
+</section>
+
+<!-- LOGADO -->
+
+<div class="hidden" id="painel-content"></div>
+    <div class="perfil">
+
+    <h1>Olá, <span id="account-username"></span>!</h1>
+   
+    <section>
+        <h2>Sua atividade</h2>
+        <div id="heatmap">HEATMAP</div>
+
+    </section>
+
+    <section>
+        <h2>Sua streak</h2>
+        <!-- Mês atual com os dias logados marcados; preenchido por calendar.js -->
+        <div id="mini-calendar" class="mini-calendar" aria-label="Calendário de atividade"></div>
+    </section>
+
+    <section>
+        <h2>Últimos acessados</h2>
+        <ul>
+            <li>Conteúdo X</li>
+            <li>Conteúdo Y</li>
+            <li>Problema A</li>
+            <li>Problema B</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2>Progresso</h2>
+        <div>algumas barras de progresso</div>
+    </section>
+
+    <section>
+        <h2>Suas metas</h2>
+
+        <div class="meta">Meta 1</div>
+        <div class="meta">Meta 2</div>
+        <div class="meta">Meta 3</div>
+
+        <button>Definir meta</button>
+    </section>
+
+      
+  
+        <section class="card">
+            <h2 class="section-heading">Olá, <span id="painel-username"></span> 👋</h2>
+            <p>Aqui está o seu progresso de estudos.</p>
+            <p class="painel-summary" id="painel-summary"></p>
+            <div class="account-actions" style="margin-top: 16px;">
+                <a class="btn-link" href="topic.html?topic=busca_binaria">Ver conteúdos</a>
+                <a class="btn-link" href="index.html">Início</a>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 class="section-heading">Problemas resolvidos</h2>
+            <ul class="painel-list" id="list-problems"></ul>
+        </section>
+
+        <section class="card">
+            <h2 class="section-heading">Referências lidas</h2>
+            <ul class="painel-list" id="list-refs"></ul>
+        </section>
+    </div>
+
+</div>
+
+<script>
+/* --- Render das listas de progresso -------------------------------------- */
+function fillList(ul, items, emptyText) {
+    ul.innerHTML = "";
+    if (!items.length) {
+        const li = document.createElement("li");
+        li.className = "painel-empty";
+        li.textContent = emptyText;
+        ul.appendChild(li);
+        return;
+    }
+    items.forEach((label) => {
+        const li = document.createElement("li");
+        li.textContent = label;
+        ul.appendChild(li);
+    });
+}
+
+function render(progress) {
+    const done = Object.values(progress).filter((p) => p.done);
+    const problems = done.filter((p) => p.kind === "problem").map((p) => p.label || "(sem nome)");
+    const refs = done.filter((p) => p.kind === "ref").map((p) => p.label || "(sem nome)");
+
+    fillList(document.getElementById("list-problems"), problems, "Nenhum problema resolvido ainda.");
+    fillList(document.getElementById("list-refs"), refs, "Nenhuma referência lida ainda.");
+
+    document.getElementById("painel-summary").textContent =
+        `${problems.length} problema(s) resolvido(s) · ${refs.length} referência(s) lida(s)`;
+}
+
+/* --- Sessão (via auth-widget) + progresso -------------------------------- */
+async function loadProgress() {
+    let progress = {};
+    try {
+        const res = await fetch("/progress", { credentials: "same-origin" });
+        if (res.ok) progress = await res.json();
+    } catch (err) {
+        /* mantém vazio */
+    }
+    render(progress);
+}
+
+// O auth-widget verifica a sessão (GET /me) e dispara "auth:change" no load e
+// sempre que o usuário entra/sai — então o painel reage sem chamar /me.
+window.addEventListener("auth:change", (e) => {
+    const user = e.detail.user;
+    const guest = document.getElementById("guest-card");
+    const content = document.getElementById("painel-content");
+    if (user) {
+        document.getElementById("painel-username").textContent = user.username;
+        guest.classList.add("hidden");
+        content.classList.remove("hidden");
+        loadProgress();
+    } else {
+        content.classList.add("hidden");
+        guest.classList.remove("hidden");
+    }
+});
+</script>
+
+{% endblock %}

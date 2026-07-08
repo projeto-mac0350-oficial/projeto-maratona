@@ -4,7 +4,7 @@ from contextlib import closing
 from datetime import date, timedelta
 from functools import wraps
 
-from flask import Flask, jsonify, request, session
+from flask import Flask, jsonify, request, session, render_template
 from werkzeug.security import check_password_hash, generate_password_hash
 
 DATABASE = "users.db"
@@ -13,7 +13,7 @@ DATABASE = "users.db"
 # on the same origin, so the session cookie set at login is sent back on /me.
 FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "..", "frontend")
 
-app = Flask(__name__, static_folder=FRONTEND_DIR, static_url_path="")
+app = Flask(__name__, template_folder=FRONTEND_DIR, static_folder=FRONTEND_DIR, static_url_path="")
 # Signs the session cookie used by auth. Override in production via the
 # SECRET_KEY environment variable.
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-change-me")
@@ -247,7 +247,7 @@ def compute_streak(days, today):
 @app.get("/")
 def index():
     """Serve the homepage; other static pages are served by static_folder."""
-    return app.send_static_file("index.html")
+    return render_template("index.html")
 
 
 # --- API -------------------------------------------------------------------
@@ -451,6 +451,16 @@ def get_topic(slug):
         problems=[_serialize_item(slug, r) for r in items if r["kind"] == "problem"],
     )
 
+
+@app.get("/programacao_junior")
+def programacao_junior():
+    """Serve the beginner roadmap page (must go through Jinja, not static)."""
+    return render_template("programacao_junior.html")
+
+@app.get("/perfil")
+@login_required
+def perfil():
+    return render_template("pagina_logado.html")
 
 # Ensure the schema exists for both `python app.py` and `flask run`.
 init_db()

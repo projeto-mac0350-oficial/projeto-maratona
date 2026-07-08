@@ -95,7 +95,8 @@
         const greeting = mount.querySelector("#user-greeting");
         const headerUsername = mount.querySelector("#header-username");
         const logoutBtn = mount.querySelector("#logout-btn");
-
+        const btnPerfil = document.getElementById("btn-logado");
+      
         const forms = {
             login: dialog.querySelector("#login-form"),
             register: dialog.querySelector("#register-form"),
@@ -108,10 +109,17 @@
         }
 
         function setLoggedIn(username) {
+          
             headerUsername.textContent = username;
             signinBtn.classList.add("auth-hidden");
             greeting.classList.remove("auth-hidden");
             logoutBtn.classList.remove("auth-hidden");
+
+            if (btnPerfil) {
+               btnPerfil.classList.remove("hidden");
+               
+            }
+
             if (dialog.open) dialog.close();
             emit({ username });
         }
@@ -120,6 +128,10 @@
             signinBtn.classList.remove("auth-hidden");
             greeting.classList.add("auth-hidden");
             logoutBtn.classList.add("auth-hidden");
+
+            if (btnPerfil) {
+                btnPerfil.classList.add("hidden");
+            }
             emit(null);
         }
 
