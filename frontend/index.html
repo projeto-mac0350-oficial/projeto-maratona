@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Projeto Maratona</title>
+    <title>Maratonusp Ensina</title>
 
     <link rel="stylesheet" href="./base.css">
     <link rel="stylesheet" href="./index.css">
@@ -23,12 +23,14 @@
 <body>
 
 <header>
-    <h1>Projeto Maratona</h1>
+    <h1>MaratonUSP Ensina</h1>
 
     <nav class="barra-navegacao">
         <div class="head_botoes">
             <!-- Login/logout control injected by auth-widget.js -->
             <span id="auth-controls"></span>
+            <a href="index.html" class="nav-button">Início</a>
+            <a href="programacao_junior.html" class="nav-button">Níveis</a>
             <button id="theme-toggle" type="button">🌙 Escuro</button>
         </div>
     </nav>
@@ -39,7 +41,10 @@
 
         <!-- HERO -->
         <section class="card hero">
-            <h1 class="title">Bem-vindo à Maratona</h1>
+            <h1 class="title">Maratonusp Ensina</h1>
+            <h2>
+                Um guia para programação competitiva, OBI, Maratona e mais!
+            </h2>
             <p class="description">
                 Plataforma de estudos para maratona de programação: conteúdos,
                 listas de problemas e soluções comentadas. Use o botão
@@ -47,7 +52,10 @@
                 acompanhar o seu progresso. Já quer ver um tema? Comece pela
                 <a href="topic.html?topic=busca_binaria">Busca Binária</a>.
             </p>
+            <h3><i>Inspirado no <a href="https://usaco.guide/">USACO Guide</a></i></h3>
         </section>
+
+
 
         <!-- PAINEL DO USUÁRIO (logado) -->
         <section class="card account hidden" id="account-card">
@@ -65,7 +73,7 @@
 </main>
 
 <footer class="site-footer">
-    Projeto Maratona — MAC0350
+    Maratonusp Ensina — MAC0350
 </footer>
 
 <script>

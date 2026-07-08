@@ -1,0 +1,145 @@
+/* ======================
+   Roadmap
+   ====================== */
+.roadmap {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 3rem 2rem 6rem;
+}
+
+.roadmap h1 {
+    color: var(--primary);
+    font-size: 3rem;
+    margin-bottom: 2rem;
+}
+
+.roadmap-secao {
+    margin-bottom: 3rem;
+}
+
+.roadmap-secao h2 {
+    margin-bottom: 1rem;
+    color: var(--text);
+    font-size: 1.5rem;
+}
+
+.roadmap ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.container-topico {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 1.2rem 1.5rem;
+
+    background: white;
+
+    border: 1px solid var(--border);
+    border-radius: 12px;
+
+    margin-bottom: 0.75rem;
+
+    transition: all 0.2s ease;
+
+    cursor: pointer;
+}
+
+.container-topico:hover {
+    transform: translateY(-2px);
+
+    border-color: var(--primary);
+
+    box-shadow: 0 8px 20px rgba(220, 38, 38, 0.08);
+}
+
+.topico-nome {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.progresso-nome {
+    color: var(--text-light);
+    font-size: 0.95rem;
+    white-space: nowrap;
+}
+
+/* ======================
+   Barra de progresso
+   ====================== */
+
+.barra-progresso {
+    width: 250px;
+    height: 8px;
+
+    margin-top: 0.5rem;
+
+    background: #e5e7eb;
+
+    border-radius: 999px;
+
+    overflow: hidden;
+}
+
+.barra-preenchida {
+    width: 20%;
+    height: 100%;
+
+    background: var(--primary);
+
+    border-radius: 999px;
+}
+
+/* ======================
+   Estados dos tópicos
+   ====================== */
+
+.container-topico.completo {
+    border-color: #22c55e;
+}
+
+.container-topico.completo .barra-preenchida {
+    width: 100%;
+    background: #22c55e;
+}
+
+.container-topico.em-andamento .barra-preenchida {
+    background: var(--primary);
+}
+
+.container-topico.bloqueado {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ======================
+   Responsividade
+   ====================== */
+
+@media (max-width: 768px) {
+
+    .roadmap {
+        padding: 2rem 1rem;
+    }
+
+    .roadmap h1 {
+        font-size: 2.2rem;
+    }
+
+    .container-topico {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .progresso-nome {
+        align-self: flex-end;
+    }
+
+    .barra-progresso {
+        width: 100%;
+    }
+}

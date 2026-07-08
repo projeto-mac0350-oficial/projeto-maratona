@@ -14,7 +14,7 @@
 }
 
 .user-greeting {
-    color: #fff;
+    color: var(--text);
     font-size: 0.9rem;
     white-space: nowrap;
 }

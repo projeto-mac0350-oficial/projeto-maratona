@@ -4,8 +4,17 @@
    stays orange in both themes; everything below it follows the tokens.
    The login control + modal styles live in auth-widget.css (shared site-wide).
    =========================================================================== */
+/* ===========================================================================
+   HOMEPAGE — Projeto Maratona
+   Estilo alinhado ao home.css: paleta vermelha, fonte Segoe UI, cards com
+   cantos bem arredondados e sombra suave, botões com destaque ao passar
+   o mouse (translateY). O header também segue o modelo do home.css
+   (.barra-navegacao): fundo claro, logo em destaque à esquerda, botões
+   à direita — sobrescrevendo o header laranja vindo de base.css.
+   O login/logout continua vindo de auth-widget.css (não mexido aqui).
+   =========================================================================== */
 :root {
-    --bg: #f5f5f5;
+    --bg: #fafafa;
     --card-bg: #ffffff;
     --text: #1f2937;
     --text-strong: #111827;
@@ -13,13 +22,19 @@
     --field-bg: #f4f4f4;
     --field-border: #d1d5db;
     --border: #e5e7eb;
+
+    /* header de base.css continua laranja nos dois temas */
     --brand: #E64F2E;
     --brand-hover: #FFB7D5;
-    --accent: #3b82f6;
-    --accent-hover: #2563eb;
+
+    /* paleta principal — igual à do home.css */
+    --primary: #dc2626;
+    --primary-dark: #b91c1c;
+    --primary-light: #fef2f2;
+
     --danger: #e74c3c;
     --success: #2ecc71;
-    --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
 [data-theme="dark"] {
@@ -31,25 +46,96 @@
     --field-bg: #0f172a;
     --field-border: #475569;
     --border: #334155;
-    --shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
+
+    --primary: #ef4444;
+    --primary-dark: #dc2626;
+    --primary-light: rgba(239, 68, 68, 0.14);
+
+    --shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
 }
 
 body {
+    font-family: "Segoe UI", sans-serif;
     background: var(--bg);
     color: var(--text);
     transition: background 0.3s, color 0.3s;
 }
 
-/* Theme toggle sits in the orange header (base.css .head_botoes button) */
+/* --- Header (modelo home.css .barra-navegacao) ----------------------------- */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 3rem;
+    background-color: var(--card-bg);
+    border-bottom: 1px solid var(--border);
+    transition: background 0.3s, border-color 0.3s;
+}
+
+header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin: 0;
+}
+
+.barra-navegacao {
+    display: flex;
+    align-items: center;
+}
+
+.head_botoes {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.head_botoes button,
+#auth-controls button {
+    padding: 0.7rem 1.2rem;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text);
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.head_botoes button:hover,
+#auth-controls button:hover {
+    background-color: var(--primary-light);
+    color: var(--primary);
+}
+
+/* Botão de tema, dentro do header (segue o mesmo padrão dos botões da nav) */
 #theme-toggle {
     min-width: 110px;
 }
 
+.head_botoes .nav-button {
+    display: inline-block;
+    padding: 0.7rem 1.2rem;
+    border-radius: 8px;
+    text-decoration: none;
+    background: transparent;
+    color: var(--text);
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: 0.2s;
+}
+
+.head_botoes .nav-button:hover {
+    background-color: var(--primary-light);
+    color: var(--primary);
+}
+
 /* --- Layout --------------------------------------------------------------- */
 .home {
-    max-width: 820px;
+    max-width: 1000px;
     width: 100%;
-    margin: 40px auto;
+    margin: 40px auto; 
     padding: 0 20px;
     box-sizing: border-box;
 }
@@ -57,38 +143,49 @@ body {
 .card {
     background: var(--card-bg);
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: 16px;
     box-shadow: var(--shadow);
-    padding: 30px;
-    margin-bottom: 25px;
-    transition: background 0.3s, border-color 0.3s;
+    padding: 1.8rem;
+    margin-bottom: 1.5rem;
+    transition: background 0.3s, border-color 0.3s, box-shadow 0.2s, transform 0.2s;
 }
 
 /* --- Hero ----------------------------------------------------------------- */
+.hero {
+    background-color: transparent;
+    border: none;
+    box-shadow:none;
+    padding:0;
+
+    width: 100%;
+    text-align: left;
+
+}
 .hero .title {
-    font-size: 34px;
-    margin-bottom: 12px;
-    color: var(--text-strong);
+    font-size: 2.6rem;
+    line-height: 1.1;
+    margin-bottom: 1rem;
+    color: var(--primary);
 }
 
 .hero .description {
     color: var(--text);
-    font-size: 17px;
+    font-size: 1.05rem;
     line-height: 1.6;
 }
 
 .hero .description a {
-    color: var(--accent);
+    color: var(--primary);
     text-decoration: none;
     font-weight: 600;
 }
 
 .hero .description a:hover {
     text-decoration: underline;
-    color: var(--accent-hover);
+    color: var(--primary-dark);
 }
 
-/* --- Logged-in panel ------------------------------------------------------ */
+/* --- Painel do usuário logado ---------------------------------------------- */
 .account h2 {
     color: var(--text-strong);
     margin-bottom: 12px;
@@ -108,18 +205,19 @@ body {
 
 .btn-link {
     display: inline-block;
-    background: var(--accent);
+    background: var(--primary);
     color: #fff;
     text-decoration: none;
-    padding: 10px 16px;
+    padding: 0.8rem 1.4rem;
     border-radius: 10px;
-    font-size: 15px;
+    font-size: 0.95rem;
     font-weight: 600;
-    transition: background 0.2s;
+    transition: background 0.2s, transform 0.2s;
 }
 
 .btn-link:hover {
-    background: var(--accent-hover);
+    background: var(--primary-dark);
+    transform: translateY(-2px);
 }
 
 .btn-secondary {
@@ -127,18 +225,19 @@ body {
     color: var(--text-strong);
     border: 1px solid var(--field-border);
     border-radius: 10px;
-    padding: 10px 16px;
-    font-size: 15px;
+    padding: 0.8rem 1.4rem;
+    font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: background 0.2s, border-color 0.2s;
 }
 
 .btn-secondary:hover {
-    background: var(--border);
+    background: var(--primary-light);
+    border-color: var(--primary);
 }
 
-/* --- Mini calendar (dias logados no mês) ----------------------------------- */
+/* --- Mini calendário (dias logados no mês) --------------------------------- */
 .mini-calendar {
     margin-top: 22px;
     padding-top: 18px;
@@ -180,7 +279,7 @@ body {
 }
 
 .mini-calendar .cal-day.today {
-    outline: 2px solid var(--brand);
+    outline: 2px solid var(--primary);
     outline-offset: -2px;
 }
 
@@ -189,7 +288,7 @@ body {
     margin-top: 12px;
 }
 
-/* --- Footer --------------------------------------------------------------- */
+/* --- Footer ----------------------------------------------------------------- */
 .site-footer {
     text-align: center;
     color: var(--muted);
@@ -201,7 +300,7 @@ body {
     display: none;
 }
 
-/* --- Responsive ----------------------------------------------------------- */
+/* --- Responsivo -------------------------------------------------------------- */
 @media (max-width: 768px) {
     header h1 {
         font-size: 1.6rem;
@@ -212,6 +311,14 @@ body {
     }
 
     .card {
-        padding: 22px;
+        padding: 1.3rem;
+    }
+
+    .hero .title {
+        font-size: 2rem;
+    }
+
+    .hero{
+        padding:0;
     }
 }
