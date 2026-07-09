@@ -457,6 +457,13 @@ def programacao_junior():
     """Serve the beginner roadmap page (must go through Jinja, not static)."""
     return render_template("programacao_junior.html")
 
+@app.get("/conteudo")
+def conteudo():
+    """Serve the generic topic page (must go through Jinja, not static, since
+    it extends base.html). The slug itself is read client-side from
+    ?topic=<slug> by the page's own script."""
+    return render_template("topic.html")
+
 @app.get("/perfil")
 @login_required
 def perfil():
