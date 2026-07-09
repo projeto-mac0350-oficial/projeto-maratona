@@ -1,29 +1,14 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Projeto Maratona</title>
+{% extends "base.html" %}
 
-    <link rel="stylesheet" href="./base.css">
-    <link rel="stylesheet" href="./conteudo.css">
-    <link rel="stylesheet" href="./auth-widget.css">
-</head>
+{% block title %}
+Projeto Maratona
+{% endblock %}
 
-<body>
+{% block extra_css %}
+<link rel="stylesheet" href="./conteudo.css">
+{% endblock %}
 
-<header>
-    <h1>Maratonusp Ensina</h1>
-
-    <nav class="barra-navegacao">
-        <div class="head_botoes">
-            <a href="programacao_junior.html" class="nav-button">Níveis</a>
-            <!-- Login/logout control injected by auth-widget.js -->
-            <span id="auth-controls"></span>
-            <button id="theme-toggle" type="button">🌙 Escuro</button>
-        </div>
-    </nav>
-</header>
+{% block content %}
 
 <div class="bb" id="topic">
     <p class="topic-back"><a href="/">← Início</a></p>
@@ -42,6 +27,9 @@
     </section>
 </div>
 
+{% endblock %}
+
+{% block extra_js %}
 <script>
 /*
  * Generic content page: reads ?topic=<slug> and renders the topic from
@@ -163,8 +151,4 @@
     document.body.appendChild(script);
 })();
 </script>
-
-<script src="./auth-widget.js"></script>
-
-</body>
-</html>
+{% endblock %}
