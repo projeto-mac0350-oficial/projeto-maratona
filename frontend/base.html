@@ -10,6 +10,46 @@
     <link rel="stylesheet" href="./auth-widget.css">
     {% block extra_css %}{% endblock %}
 
+    <!-- Dropdown do menu "Níveis". Só algumas regras pontuais — mova para
+         base.css quando conveniente, não há necessidade de manter isso aqui. -->
+    <style>
+        .nav-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .nav-dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin-top: 0.4rem;
+            min-width: 160px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            z-index: 20;
+        }
+        .nav-dropdown-menu a {
+            display: block;
+            padding: 0.6rem 1rem;
+            color: var(--text);
+            text-decoration: none;
+            font-size: 0.95rem;
+            white-space: nowrap;
+        }
+        .nav-dropdown-menu a:hover {
+            background: var(--primary);
+            color: #fff;
+        }
+        .nav-dropdown-menu .nav-dropdown-status {
+            display: block;
+            padding: 0.6rem 1rem;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+    </style>
+
     <!-- Apply the saved theme before first paint to avoid a flash. -->
     <script>
         (function () {
@@ -31,7 +71,13 @@
             <!-- Login/logout control injected by auth-widget.js -->
             <span id="auth-controls"></span>
             <a href="/" class="nav-button">Início</a>
-            <a href="/programacao_junior" class="nav-button">Níveis</a>
+            <div class="nav-dropdown" id="niveis-dropdown">
+                <button type="button" class="nav-button" id="niveis-toggle"
+                        aria-haspopup="true" aria-expanded="false">
+                    Níveis ▾
+                </button>
+                <div class="nav-dropdown-menu" id="niveis-menu" hidden></div>
+            </div>
             <a href="/perfil" id="btn-logado" class="nav-button hidden">Perfil</a>
             <button id="theme-toggle" type="button">🌙 Escuro</button>
         </div>
@@ -65,6 +111,48 @@ themeToggle.addEventListener("click", () => {
 });
 
 refreshThemeLabel();
+
+/* --- Menu "Níveis": busca as opções em /levels e monta o dropdown --------- */
+const niveisToggle = document.getElementById("niveis-toggle");
+const niveisMenu = document.getElementById("niveis-menu");
+let niveisLoaded = false;
+
+async function loadNiveisMenu() {
+    try {
+        const res = await fetch("/levels", { credentials: "same-origin" });
+        if (!res.ok) throw new Error("request failed");
+        const levels = await res.json();
+        niveisMenu.innerHTML = "";
+        if (!levels.length) {
+            niveisMenu.innerHTML = '<span class="nav-dropdown-status">Nenhum nível ainda</span>';
+            return;
+        }
+        levels.forEach((level) => {
+            const a = document.createElement("a");
+            a.href = `/conteudos?level=${encodeURIComponent(level.slug)}`;
+            a.textContent = level.title;
+            niveisMenu.appendChild(a);
+        });
+        niveisLoaded = true;
+    } catch (err) {
+        niveisMenu.innerHTML = '<span class="nav-dropdown-status">Não foi possível carregar</span>';
+    }
+}
+
+niveisToggle.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const willOpen = niveisMenu.hidden;
+    niveisMenu.hidden = !willOpen;
+    niveisToggle.setAttribute("aria-expanded", String(willOpen));
+    if (willOpen && !niveisLoaded) loadNiveisMenu();
+});
+
+document.addEventListener("click", (e) => {
+    if (!niveisMenu.hidden && !niveisMenu.contains(e.target) && e.target !== niveisToggle) {
+        niveisMenu.hidden = true;
+        niveisToggle.setAttribute("aria-expanded", "false");
+    }
+});
 
 /* --- Painel do usuário: reage ao login/logout do auth-widget -------------- */
 const accountCard = document.getElementById("account-card");

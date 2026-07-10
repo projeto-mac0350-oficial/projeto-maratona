@@ -68,6 +68,18 @@ def init_db():
             )
             """
         )
+        # Levels group topics into separate lists/pages (e.g. Nível 1, 2, 3).
+        # Seeded from SEED_LEVELS below, same idempotent-upsert pattern as topics.
+        db.execute(
+            """
+            CREATE TABLE IF NOT EXISTS levels (
+                id       INTEGER PRIMARY KEY AUTOINCREMENT,
+                slug     TEXT UNIQUE NOT NULL,
+                title    TEXT NOT NULL,
+                position INTEGER NOT NULL DEFAULT 0
+            )
+            """
+        )
         # Study content: topics and their items (references to read + problems to
         # solve). This is course-authored reference data — read-only over the API
         # and seeded from SEED_CONTENT below, so adding a topic means editing data,
@@ -79,6 +91,7 @@ def init_db():
                 slug     TEXT UNIQUE NOT NULL,
                 title    TEXT NOT NULL,
                 summary  TEXT,
+                level_id INTEGER REFERENCES levels(id),
                 position INTEGER NOT NULL DEFAULT 0
             )
             """
@@ -104,17 +117,51 @@ def init_db():
         existing = {row["name"] for row in db.execute("PRAGMA table_info(topic_items)")}
         if "difficulty" not in existing:
             db.execute("ALTER TABLE topic_items ADD COLUMN difficulty TEXT")
+        existing_topics = {row["name"] for row in db.execute("PRAGMA table_info(topics)")}
+        if "level_id" not in existing_topics:
+            db.execute("ALTER TABLE topics ADD COLUMN level_id INTEGER REFERENCES levels(id)")
         db.commit()
+    seed_levels()
     seed_content()
+
+
+# The lists shown under the "Níveis" menu, each with its own topics page
+# (/conteudos?level=<slug>). Position controls both the menu order and the
+# order topics are grouped in.
+SEED_LEVELS = [
+    {"slug": "nivel_1", "title": "Nível 1"},
+    {"slug": "nivel_2", "title": "Nível 2"},
+    {"slug": "nivel_3", "title": "Nível 3"},
+]
+
+
+def seed_levels():
+    """Upsert SEED_LEVELS into the levels table (idempotent, by slug)."""
+    with closing(get_db()) as db:
+        for pos, level in enumerate(SEED_LEVELS):
+            db.execute(
+                """
+                INSERT INTO levels (slug, title, position)
+                VALUES (?, ?, ?)
+                ON CONFLICT(slug) DO UPDATE SET
+                    title    = excluded.title,
+                    position = excluded.position
+                """,
+                (level["slug"], level["title"], pos),
+            )
+        db.commit()
 
 
 # Course-authored study content. Each topic lists references to read and
 # problems to solve; "url" is the external link, "solution_url" the local
-# solution page. To add material, edit this structure — the schema and API
-# stay the same. Item order here is the order shown to the student.
+# solution page. "level" must match a slug in SEED_LEVELS — it's what groups
+# the topic under a given /conteudos?level=<slug> page. To add material, edit
+# this structure — the schema and API stay the same. Item order here is the
+# order shown to the student.
 SEED_CONTENT = [
     {
         "slug": "busca_binaria",
+        "level": "nivel_1",
         "title": "Busca Binária",
         "summary": (
             "A busca binária é um algoritmo eficiente de divisão e conquista "
@@ -167,16 +214,21 @@ def seed_content():
     """Upsert SEED_CONTENT into the topics tables (idempotent, by slug)."""
     with closing(get_db()) as db:
         for t_pos, topic in enumerate(SEED_CONTENT):
+            level_row = db.execute(
+                "SELECT id FROM levels WHERE slug = ?", (topic["level"],)
+            ).fetchone()
+            level_id = level_row["id"] if level_row else None
             db.execute(
                 """
-                INSERT INTO topics (slug, title, summary, position)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO topics (slug, title, summary, level_id, position)
+                VALUES (?, ?, ?, ?, ?)
                 ON CONFLICT(slug) DO UPDATE SET
                     title    = excluded.title,
                     summary  = excluded.summary,
+                    level_id = excluded.level_id,
                     position = excluded.position
                 """,
-                (topic["slug"], topic["title"], topic["summary"], t_pos),
+                (topic["slug"], topic["title"], topic["summary"], level_id, t_pos),
             )
             topic_id = db.execute(
                 "SELECT id FROM topics WHERE slug = ?", (topic["slug"],)
@@ -390,6 +442,43 @@ def set_progress():
     return jsonify(item_key=item_key, done=bool(done))
 
 
+# --- Levels ------------------------------------------------------------
+
+
+@app.get("/levels")
+def list_levels():
+    """List the levels (e.g. Nível 1, 2, 3) that power the "Níveis" menu."""
+    with closing(get_db()) as db:
+        rows = db.execute(
+            "SELECT slug, title FROM levels ORDER BY position, id"
+        ).fetchall()
+    return jsonify([dict(row) for row in rows])
+
+
+@app.get("/levels/<slug>")
+def get_level(slug):
+    """Return one level with its topics (summary only, no items) — this is
+    what /conteudos?level=<slug> fetches to render its list of cards."""
+    with closing(get_db()) as db:
+        level = db.execute(
+            "SELECT id, slug, title FROM levels WHERE slug = ?", (slug,)
+        ).fetchone()
+        if level is None:
+            return jsonify(error="level not found"), 404
+        topics = db.execute(
+            """
+            SELECT slug, title, summary FROM topics
+            WHERE level_id = ? ORDER BY position, id
+            """,
+            (level["id"],),
+        ).fetchall()
+    return jsonify(
+        slug=level["slug"],
+        title=level["title"],
+        topics=[dict(row) for row in topics],
+    )
+
+
 # --- Content ---------------------------------------------------------------
 
 
@@ -431,7 +520,13 @@ def get_topic(slug):
     """Return one topic with its references and problems, in authoring order."""
     with closing(get_db()) as db:
         topic = db.execute(
-            "SELECT id, slug, title, summary FROM topics WHERE slug = ?", (slug,)
+            """
+            SELECT t.id, t.slug, t.title, t.summary, l.slug AS level
+            FROM topics t
+            LEFT JOIN levels l
+            ON t.level_id = l.id
+            WHERE t.slug = ?""", 
+            (slug,)
         ).fetchone()
         if topic is None:
             return jsonify(error="topic not found"), 404
@@ -447,6 +542,7 @@ def get_topic(slug):
         slug=topic["slug"],
         title=topic["title"],
         summary=topic["summary"],
+        level=topic["level"],
         references=[_serialize_item(slug, r) for r in items if r["kind"] == "ref"],
         problems=[_serialize_item(slug, r) for r in items if r["kind"] == "problem"],
     )
@@ -463,6 +559,11 @@ def conteudo():
     it extends base.html). The slug itself is read client-side from
     ?topic=<slug> by the page's own script."""
     return render_template("topic.html")
+
+@app.get("/conteudos")
+def conteudos():
+    """Serve the topics list page (cards linking to /conteudo?topic=<slug>)."""
+    return render_template("topics_list.html")
 
 @app.get("/perfil")
 @login_required

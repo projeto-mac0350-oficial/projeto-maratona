@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}
+MaratonUSP Ensina - Conteúdos
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="topics_list.css">
+{% endblock %}
+
+{% block content %}
+
+<div class="topics-list">
+    <h1 id="topics-list-title"></h1>
+    <div class="topics-grid" id="topics-grid">
+        <p class="topics-status" id="topics-status">Carregando…</p>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+/*
+ * Two modes, chosen by the ?level=<slug> query param:
+ *  - no level: shows a chooser card per level (from GET /levels), each
+ *    linking to /conteudos?level=<slug>.
+ *  - level given: fetches GET /levels/<slug> (level + its topics) and
+ *    renders one card per topic, linking to /conteudo?topic=<slug>.
+ */
+(async () => {
+    const titleEl = document.getElementById("topics-list-title");
+    const grid = document.getElementById("topics-grid");
+    const status = document.getElementById("topics-status");
+
+    function fail(message) {
+        status.textContent = message;
+    }
+
+    async function renderLevelChooser() {
+        let levels;
+        try {
+            const res = await fetch("/levels", { credentials: "same-origin" });
+            if (!res.ok) throw new Error("request failed");
+            levels = await res.json();
+        } catch (err) {
+            fail("Não foi possível carregar os níveis.");
+            return;
+        }
+        if (!levels.length) {
+            fail("Nenhum nível disponível ainda.");
+            return;
+        }
+        status.remove();
+        levels.forEach((level) => {
+            const card = document.createElement("a");
+            card.className = "topic-card";
+            card.href = `/conteudos?level=${encodeURIComponent(level.slug)}`;
+
+            const title = document.createElement("div");
+            title.className = "topic-card-title";
+            title.textContent = level.title;
+            card.appendChild(title);
+
+            grid.appendChild(card);
+        });
+    }
+
+    function renderTopicCards(topics) {
+        if (!topics.length) {
+            fail("Nenhum conteúdo disponível ainda neste nível.");
+            return;
+        }
+        status.remove();
+        topics.forEach((topic) => {
+            const card = document.createElement("a");
+            card.className = "topic-card";
+            card.href = `/conteudo?topic=${encodeURIComponent(topic.slug)}`;
+
+            const title = document.createElement("div");
+            title.className = "topic-card-title";
+            title.textContent = topic.title;
+            card.appendChild(title);
+
+            if (topic.summary) {
+                const summary = document.createElement("p");
+                summary.className = "topic-card-summary";
+                summary.textContent = topic.summary;
+                card.appendChild(summary);
+            }
+
+            grid.appendChild(card);
+        });
+    }
+
+    const levelSlug = new URLSearchParams(location.search).get("level");
+
+    let level;
+    try {
+        const res = await fetch(`/levels/${encodeURIComponent(levelSlug)}`, {
+            credentials: "same-origin",
+        });
+        if (res.status === 404) {
+            fail("Nível não encontrado.");
+            return;
+        }
+        if (!res.ok) throw new Error("request failed");
+        level = await res.json();
+    } catch (err) {
+        fail("Não foi possível carregar os conteúdos.");
+        return;
+    }
+
+    document.title = `${level.title} — Conteúdos — MaratonUSP Ensina`;
+    titleEl.textContent = `${level.title}`;
+    renderTopicCards(level.topics);
+})();
+</script>
+{% endblock %}

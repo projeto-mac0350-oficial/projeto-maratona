@@ -1,0 +1,86 @@
+/* ======================
+   Listagem de conteúdos
+   ====================== */
+.topics-list {
+    max-width: 1200px;
+    padding: 3rem 2rem 6rem;
+    margin: 0 40px;
+}
+
+.topics-list h1 {
+    color: var(--primary);
+    font-size: 3rem;
+    margin-bottom: 2rem;
+}
+
+.topics-status {
+    color: var(--text-light);
+}
+
+/* ======================
+   Grade de cartões
+   ====================== */
+.topics-grid {
+    display: flex;
+
+}
+
+.topic-card {
+    display: block;
+
+    padding: 1.5rem;
+
+    background: var(--card-bg);
+
+    border: 1px solid var(--border);
+    border-radius: 12px;
+
+    text-decoration: none;
+    color: inherit;
+
+    transition: all 0.2s ease;
+}
+
+.topic-card:hover {
+    transform: translateY(-2px);
+
+    border-color: var(--primary);
+
+    box-shadow: 0 8px 20px rgba(220, 38, 38, 0.08);
+}
+
+.topic-card-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+}
+
+.topic-card-summary {
+    color: var(--text-light);
+    font-size: 0.95rem;
+    line-height: 1.5;
+
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* ======================
+   Responsividade
+   ====================== */
+@media (max-width: 768px) {
+    .topics-list {
+        padding: 2rem 1rem;
+        margin: 0;
+    }
+
+    .topics-list h1 {
+        font-size: 2.2rem;
+    }
+
+    .topics-grid {
+        grid-template-columns: 1fr;
+    }
+}

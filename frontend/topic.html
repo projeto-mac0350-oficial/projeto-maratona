@@ -5,13 +5,13 @@ Projeto Maratona
 {% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="./conteudo.css">
+<link rel="stylesheet" href="./topic.css">
 {% endblock %}
 
 {% block content %}
 
 <div class="bb" id="topic">
-    <p class="topic-back"><a href="/">← Início</a></p>
+    <a id="topic-back" href="">← Todos os conteúdos</a>
 
     <h1 class="title" id="topic-title">Carregando…</h1>
     <p class="description" id="topic-summary"></p>
@@ -42,6 +42,7 @@ Projeto Maratona
 (async () => {
     const titleEl = document.getElementById("topic-title");
     const summaryEl = document.getElementById("topic-summary");
+    const backEl = document.getElementById("topic-back");
 
     function fail(message) {
         titleEl.textContent = message;
@@ -71,9 +72,10 @@ Projeto Maratona
         return;
     }
 
-    document.title = `${topic.title} — Projeto Maratona`;
+    document.title = `${topic.title} — MaratonUSP Ensina`;
     titleEl.textContent = topic.title;
     summaryEl.textContent = topic.summary || "";
+    backEl.href = `/conteudos?level=${topic.level}`;
 
     // A toggle button wired for progress.js (kind decides its on/off styling).
     function makeToggle(item, classes, offText) {
