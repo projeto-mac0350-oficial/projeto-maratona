@@ -548,11 +548,6 @@ def get_topic(slug):
     )
 
 
-@app.get("/programacao_junior")
-def programacao_junior():
-    """Serve the beginner roadmap page (must go through Jinja, not static)."""
-    return render_template("programacao_junior.html")
-
 @app.get("/conteudo")
 def conteudo():
     """Serve the generic topic page (must go through Jinja, not static, since

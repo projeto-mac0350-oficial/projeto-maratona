@@ -14,8 +14,12 @@ projeto-maratona/
 ├── frontend/               # páginas (HTML + CSS)
 │   ├── index.html          # homepage: login/registro + tema claro/escuro
 │   ├── index.css           # estilos da homepage (com tokens de tema)
-│   ├── topic.html          # página de conteúdo genérica (renderiza GET /topics/<slug>)
-│   ├── busca_binaria.html  # redireciona p/ topic.html?topic=busca_binaria (compatibilidade)
+│   ├── base.html           # layout compartilhado (header, nav, footer, tema); páginas de conteúdo o estendem via Jinja
+│   ├── topic.html          # página de conteúdo genérica, estende base.html (renderiza GET /topics/<slug>)
+│   ├── conteudo.css        # estilos específicos de topic.html
+│   ├── topics_list.html    # listagem em cartões: níveis (sem ?level=) ou tópicos de um nível (?level=<slug>)
+│   ├── topics_list.css
+│   ├── busca_binaria.html  # redireciona p/ /conteudo?topic=busca_binaria (compatibilidade)
 │   ├── solucao.html        # página de solução de um problema
 │   ├── painel.html         # dashboard: progresso do usuário logado
 │   ├── progress.js         # persiste os toggles "lido/resolvido" por usuário
@@ -23,11 +27,11 @@ projeto-maratona/
 │   ├── auth-widget.js      # controle de login/logout compartilhado (botão + modal)
 │   ├── auth-widget.css     # estilos do controle de login (tokens com fallback)
 │   ├── base.css            # cabeçalho/identidade visual compartilhada
-│   ├── conteudo.css
 │   └── solucao.css
 ├── PLAN.md                 # plano de entrega (PRs atômicos)
 └── README.md
 ```
+
 
 ## Como rodar
 
@@ -44,10 +48,12 @@ login/registro e alternância de tema claro/escuro (a preferência é salva no
 start e é ignorado pelo Git. Defina `SECRET_KEY` no ambiente para produção.
 
 ## Endpoints
-
+ 
 | Método | Rota         | Descrição                                             |
 | ------ | ------------ | ----------------------------------------------------- |
 | GET    | `/`          | Homepage (`index.html`)                               |
+| GET    | `/conteudo`  | Página de um tópico (`topic.html`); slug lido de `?topic=<slug>` no client |
+| GET    | `/conteudos` | Listagem em cartões (`topics_list.html`): níveis, ou tópicos de um nível via `?level=<slug>` |
 | GET    | `/health`    | Liveness — `{"status": "ok"}`                         |
 | POST   | `/register`  | `{username, password}` → cria usuário; `409` se já existe, `400` se faltar campo |
 | POST   | `/login`     | `{username, password}` → inicia a sessão; `401` se inválido |
@@ -56,8 +62,11 @@ start e é ignorado pelo Git. Defina `SECRET_KEY` no ambiente para produção.
 | GET    | `/progress`  | Protegida — progresso do usuário, mapa por `item_key` |
 | POST   | `/progress`  | Protegida — salva `{item_key, kind, label, done}`     |
 | GET    | `/activity`  | Protegida — registra o dia e retorna `{today, streak, days}` (dias logados no mês) |
+| GET    | `/levels`    | Lista de níveis (`slug`, `title`) — alimenta o menu "Níveis" |
+| GET    | `/levels/<slug>` | Um nível com seus tópicos (`slug`, `title`, `summary`); `404` se não existe |
 | GET    | `/topics`    | Lista de tópicos de estudo (`slug`, `title`, `summary`) |
 | GET    | `/topics/<slug>` | Um tópico com `references` e `problems`; `404` se não existe |
+
 
 As senhas são guardadas com hash (`werkzeug.security`) e a sessão usa cookie
 assinado do Flask.
@@ -67,26 +76,35 @@ assinado do Flask.
 As páginas em `frontend/` usam links relativos (CSS e navegação) e são servidas
 pelo Flask na mesma origem da API — isso é o que faz o cookie de sessão do login
 funcionar nas chamadas a `/me`. A homepage (`/`) é o ponto de entrada; as demais
-páginas (ex.: `/topic.html?topic=busca_binaria`) também são servidas pelo backend.
-
+páginas de conteúdo (ex.: `/conteudo?topic=busca_binaria`) também são servidas
+pelo backend, via `render_template`, para poderem estender `base.html`.
+ 
+O header, a nav e o footer ficam centralizados em `base.html` (`{% block content %}`
+e `{% block extra_js %}` são os pontos de extensão); páginas como `index.html` e
+`topic.html` estendem esse layout em vez de repetir a marcação. Qualquer página
+de conteúdo que precise passar por `{% extends %}` do Jinja tem que ter uma rota
+própria no Flask (não pode ser servida como arquivo estático puro).
+ 
 O controle de login no canto superior (botão **Entrar** → modal, ou saudação +
 **Sair**) é o mesmo em todas as páginas: vem de `auth-widget.js`/`auth-widget.css`.
 Cada página só inclui esses dois arquivos e coloca `<span id="auth-controls"></span>`
 no cabeçalho; o widget verifica a sessão (`GET /me`), injeta o modal e dispara um
 evento `auth:change` que as páginas usam para mostrar/ocultar a área do usuário.
-
+ 
 Na homepage, a área do usuário logado mostra um **mini calendário** do mês
 (`calendar.js`): cada visita autenticada registra o dia (o backend grava em
 `/login` e `/me`, e `GET /activity` devolve os dias do mês + a sequência), os
 dias registrados aparecem marcados, o dia atual destacado e a **sequência** —
 dias seguidos de acesso — logo abaixo. Sem login o calendário não aparece.
-
-O conteúdo de estudo vem do banco (tabelas `topics`/`topic_items`, populadas por
-`SEED_CONTENT` em `app.py`): `topic.html` lê o `slug` da query string, busca
-`GET /topics/<slug>` e monta a página. Cada item já traz o `item_key` e o `label`
+ 
+O conteúdo de estudo vem do banco (tabelas `levels`/`topics`/`topic_items`,
+populadas por `SEED_LEVELS`/`SEED_CONTENT` em `app.py`): cada tópico pertence a
+um nível (`level_id`), e `topic.html` lê o `slug` da query string (`/conteudo?topic=<slug>`),
+busca `GET /topics/<slug>` e monta a página. Cada item já traz o `item_key` e o `label`
 usados pelo `progress.js`, então os toggles persistem como nas páginas estáticas.
 Cada problema também traz uma `difficulty` (`easy`/`medium`/`hard`) que vira a
 barra de cor (verde/amarelo/vermelho) ao lado do título.
+
 
 ## Progresso de estudos
 
