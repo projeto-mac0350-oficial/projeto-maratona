@@ -55,6 +55,23 @@ def init_db():
             )
             """
         )
+        # User-defined study goals ("Suas metas"). No "done" flag: checking a
+        # goal off is treated as completing it, so the row is deleted rather
+        # than kept around — matches the UI, where the goal just disappears.
+        # due_day/due_month are optional and have no year (a recurring
+        # day/month reminder, e.g. "15/08"), so they're plain small ints.
+        db.execute(
+            """
+            CREATE TABLE IF NOT EXISTS goals (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id     INTEGER NOT NULL REFERENCES users(id),
+                description TEXT    NOT NULL,
+                due_day     INTEGER,
+                due_month   INTEGER,
+                created_at  TEXT    NOT NULL DEFAULT (datetime('now'))
+            )
+            """
+        )
         # One row per (user, calendar day) the user was seen authenticated —
         # recorded on login and on /me, so staying logged in via the session
         # cookie still counts. Day is the server-local date ('YYYY-MM-DD');
@@ -441,6 +458,85 @@ def set_progress():
 
     return jsonify(item_key=item_key, done=bool(done))
 
+
+# --- Goals ("Suas metas") ---------------------------------------------------
+#
+# Simple per-user to-do list shown on the profile page. There's no "done"
+# flag: checking a goal off completes it, and the UI just makes it disappear —
+# so the backend mirrors that by deleting the row instead of tracking state.
+ 
+MAX_GOAL_DESCRIPTION_LENGTH = 100
+ 
+ 
+@app.get("/goals")
+@login_required
+def list_goals():
+    """List the current user's goals, oldest first."""
+    with closing(get_db()) as db:
+        rows = db.execute(
+            """
+            SELECT id, description, due_day, due_month FROM goals
+            WHERE user_id = ? ORDER BY id
+            """,
+            (session["user_id"],),
+        ).fetchall()
+    return jsonify([dict(row) for row in rows])
+ 
+ 
+@app.post("/goals")
+@login_required
+def create_goal():
+    """Create a goal. due_day/due_month are optional but must come together."""
+    data = request.get_json(silent=True) or {}
+    description = (data.get("description") or "").strip()
+    if not description:
+        return jsonify(error="description is required"), 400
+    if len(description) > MAX_GOAL_DESCRIPTION_LENGTH:
+        return jsonify(
+            error=f"description must be at most {MAX_GOAL_DESCRIPTION_LENGTH} characters"
+        ), 400
+ 
+    due_day = data.get("due_day")
+    due_month = data.get("due_month")
+    if (due_day is None) != (due_month is None):
+        return jsonify(error="due_day and due_month must be given together"), 400
+    if due_day is not None:
+        try:
+            due_day = int(due_day)
+            due_month = int(due_month)
+        except (TypeError, ValueError):
+            return jsonify(error="due_day and due_month must be integers"), 400
+        if not (1 <= due_day <= 31) or not (1 <= due_month <= 12):
+            return jsonify(error="invalid due date"), 400
+ 
+    with closing(get_db()) as db:
+        cur = db.execute(
+            """
+            INSERT INTO goals (user_id, description, due_day, due_month)
+            VALUES (?, ?, ?, ?)
+            """,
+            (session["user_id"], description, due_day, due_month),
+        )
+        db.commit()
+        goal_id = cur.lastrowid
+ 
+    return jsonify(
+        id=goal_id, description=description, due_day=due_day, due_month=due_month
+    ), 201
+ 
+ 
+@app.delete("/goals/<int:goal_id>")
+@login_required
+def delete_goal(goal_id):
+    """Delete one of the current user's goals (completing it, in UI terms)."""
+    with closing(get_db()) as db:
+        db.execute(
+            "DELETE FROM goals WHERE id = ? AND user_id = ?",
+            (goal_id, session["user_id"]),
+        )
+        db.commit()
+    return jsonify(deleted=True)
+ 
 
 # --- Levels ------------------------------------------------------------
 
