@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-MaratonUSP Ensina - Nível Júnior
+MaratonUSP Ensina - Meu painel
 {% endblock %}
 
 {% block extra_css %}
@@ -19,7 +19,7 @@ MaratonUSP Ensina - Nível Júnior
 
 <!-- LOGADO -->
 
-<div class="hidden" id="painel-content"></div>
+<div class="hidden" id="painel-content">
     <div class="perfil">
 
     <h1>Olá, <span id="account-username"></span>!</h1>
@@ -54,11 +54,32 @@ MaratonUSP Ensina - Nível Júnior
     <section>
         <h2>Suas metas</h2>
 
-        <div class="meta">Meta 1</div>
-        <div class="meta">Meta 2</div>
-        <div class="meta">Meta 3</div>
+        <ul class="metas-list" id="metas-list"></ul>
 
-        <button>Definir meta</button>
+        <form class="meta-form hidden" id="meta-form">
+            <label class="meta-form-field">
+                Descrição
+                <input type="text" id="meta-descricao" maxlength="100" required
+                       placeholder="Ex.: Resolver 5 problemas de grafos">
+            </label>
+
+            <label class="meta-form-field meta-form-field-date">
+                Prazo (opcional)
+                <span class="meta-form-date">
+                    <input type="number" id="meta-dia" min="1" max="31" placeholder="Dia">
+                    <input type="number" id="meta-mes" min="1" max="12" placeholder="Mês">
+                </span>
+            </label>
+
+            <p class="meta-form-error hidden" id="meta-form-error"></p>
+
+            <div class="meta-form-actions">
+                <button type="submit" class="btn-link">Salvar</button>
+                <button type="button" class="btn-link btn-secondary" id="meta-cancelar">Cancelar</button>
+            </div>
+        </form>
+
+        <button type="button" id="btn-definir-meta">Definir meta</button>
     </section>
 
       
@@ -68,8 +89,8 @@ MaratonUSP Ensina - Nível Júnior
             <p>Aqui está o seu progresso de estudos.</p>
             <p class="painel-summary" id="painel-summary"></p>
             <div class="account-actions" style="margin-top: 16px;">
-                <a class="btn-link" href="topic.html?topic=busca_binaria">Ver conteúdos</a>
-                <a class="btn-link" href="index.html">Início</a>
+                <a class="btn-link" href="/conteudo?topic=busca_binaria">Ver conteúdos</a>
+                <a class="btn-link" href="/">Início</a>
             </div>
         </section>
 
@@ -116,6 +137,158 @@ function render(progress) {
         `${problems.length} problema(s) resolvido(s) · ${refs.length} referência(s) lida(s)`;
 }
 
+/* --- Metas ("Suas metas") ------------------------------------------------- */
+const metasList = document.getElementById("metas-list");
+const metaForm = document.getElementById("meta-form");
+const metaDescricao = document.getElementById("meta-descricao");
+const metaDia = document.getElementById("meta-dia");
+const metaMes = document.getElementById("meta-mes");
+const metaFormError = document.getElementById("meta-form-error");
+const btnDefinirMeta = document.getElementById("btn-definir-meta");
+const btnCancelarMeta = document.getElementById("meta-cancelar");
+
+function showMetaFormError(message) {
+    metaFormError.textContent = message;
+    metaFormError.classList.remove("hidden");
+}
+
+function resetMetaForm() {
+    metaDescricao.value = "";
+    metaDia.value = "";
+    metaMes.value = "";
+    metaFormError.classList.add("hidden");
+    metaFormError.textContent = "";
+}
+
+btnDefinirMeta.addEventListener("click", () => {
+    metaForm.classList.remove("hidden");
+    btnDefinirMeta.classList.add("hidden");
+    metaDescricao.focus();
+});
+
+btnCancelarMeta.addEventListener("click", () => {
+    resetMetaForm();
+    metaForm.classList.add("hidden");
+    btnDefinirMeta.classList.remove("hidden");
+});
+
+function renderGoals(goals) {
+    metasList.innerHTML = "";
+    if (!goals.length) {
+        const li = document.createElement("li");
+        li.className = "metas-empty";
+        li.textContent = "Nenhuma meta definida ainda.";
+        metasList.appendChild(li);
+        return;
+    }
+    goals.forEach((goal) => {
+        const li = document.createElement("li");
+        li.className = "meta-item";
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.addEventListener("change", () => completeGoal(goal.id, li));
+
+        const text = document.createElement("span");
+        text.className = "meta-item-text";
+        text.textContent = goal.description;
+
+        li.appendChild(checkbox);
+        li.appendChild(text);
+
+        if (goal.due_day && goal.due_month) {
+            const due = document.createElement("span");
+            due.className = "meta-item-due";
+            const dia = String(goal.due_day).padStart(2, "0");
+            const mes = String(goal.due_month).padStart(2, "0");
+            due.textContent = `até ${dia}/${mes}`;
+            li.appendChild(due);
+        }
+
+        metasList.appendChild(li);
+    });
+}
+
+async function loadGoals() {
+    try {
+        const res = await fetch("/goals", { credentials: "same-origin" });
+        if (!res.ok) throw new Error("request failed");
+        renderGoals(await res.json());
+    } catch (err) {
+        metasList.innerHTML = '<li class="metas-empty">Não foi possível carregar as metas.</li>';
+    }
+}
+
+async function completeGoal(id, li) {
+    // A meta "concluída" simplesmente some — não existe estado "feito" salvo.
+    li.remove();
+    try {
+        const res = await fetch(`/goals/${id}`, {
+            method: "DELETE",
+            credentials: "same-origin",
+        });
+        if (!res.ok) throw new Error("request failed");
+        if (!metasList.children.length) renderGoals([]);
+    } catch (err) {
+        // Falhou: recarrega a lista de verdade pra não ficar dessincronizado.
+        loadGoals();
+    }
+}
+
+metaForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    metaFormError.classList.add("hidden");
+
+    const description = metaDescricao.value.trim();
+    if (!description) {
+        showMetaFormError("Descreva a meta.");
+        return;
+    }
+    if (description.length > 100) {
+        showMetaFormError("A descrição pode ter no máximo 100 caracteres.");
+        return;
+    }
+
+    const diaRaw = metaDia.value.trim();
+    const mesRaw = metaMes.value.trim();
+    if (Boolean(diaRaw) !== Boolean(mesRaw)) {
+        showMetaFormError("Preencha dia e mês, ou deixe os dois em branco.");
+        return;
+    }
+
+    const body = { description };
+    if (diaRaw && mesRaw) {
+        const dia = Number(diaRaw);
+        const mes = Number(mesRaw);
+        if (!Number.isInteger(dia) || dia < 1 || dia > 31 || !Number.isInteger(mes) || mes < 1 || mes > 12) {
+            showMetaFormError("Prazo inválido — confira o dia e o mês.");
+            return;
+        }
+        body.due_day = dia;
+        body.due_month = mes;
+    }
+
+    try {
+        const res = await fetch("/goals", {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+        });
+        if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            showMetaFormError(data.error || "Não foi possível salvar a meta.");
+            return;
+        }
+        resetMetaForm();
+        metaForm.classList.add("hidden");
+        btnDefinirMeta.classList.remove("hidden");
+        loadGoals();
+    } catch (err) {
+        showMetaFormError("Não foi possível salvar a meta.");
+    }
+});
+
 /* --- Sessão (via auth-widget) + progresso -------------------------------- */
 async function loadProgress() {
     let progress = {};
@@ -139,9 +312,13 @@ window.addEventListener("auth:change", (e) => {
         guest.classList.add("hidden");
         content.classList.remove("hidden");
         loadProgress();
+        loadGoals();
     } else {
         content.classList.add("hidden");
         guest.classList.remove("hidden");
+        resetMetaForm();
+        metaForm.classList.add("hidden");
+        btnDefinirMeta.classList.remove("hidden");
     }
 });
 </script>
