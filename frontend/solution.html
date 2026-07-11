@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}
+Solução
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/topic.css">
+<link rel="stylesheet" href="/solution.css">
+{% endblock %}
+
+
+{% block content %}
+
+<div class="solution-page" id="solution">
+
+    <h1 class="title" id="solution-title">Carregando…</h1>
+
+    <section class="solution-section">
+        <h2 class="section-title"> Enunciado </h2>
+        <div class="solution-text" id="solution-statement"></div>
+        <div class="info-box" id="statement-link-box">
+            <strong>🔗 Enunciado na fonte:</strong>
+            <a id="statement-link" target="_blank">
+                Abrir problema
+            </a>
+        </div>
+    </section>
+
+    <section class="solution-section">
+        <h2 class="section-title"> Solução comentada</h2>
+        <div class="solution-text" id="solution-explanation"></div>
+    </section>
+
+    <section class="solution-section">
+        <h2 class="section-title">Implementação</h2>
+
+        <pre><code id="solution-code" class="language-cpp"></code></pre>
+
+    </section>
+
+
+    <a id="solution-back" href="">
+        ← Voltar para o tópico
+    </a>
+
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+
+<script>
+
+(async () => {
+
+    const titleEl = document.getElementById("solution-title");
+    const statementEl = document.getElementById("solution-statement");
+    const explanationEl = document.getElementById("solution-explanation");
+    const codeEl = document.getElementById("solution-code");
+    const backEl = document.getElementById("solution-back");
+
+    const linkBox = document.getElementById("statement-link-box");
+    const linkEl = document.getElementById("statement-link");
+
+    function fail(message) {
+        titleEl.textContent = message;
+        statementEl.textContent = "";
+        explanationEl.textContent = "";
+        codeEl.textContent = "";
+    }
+
+    const slug = new URLSearchParams(location.search).get("problem");
+
+    if (!slug) {
+        fail("Nenhum problema informado");
+        return;
+    }
+
+    let solution;
+
+    try {
+
+        const res = await fetch(`/solutions/${encodeURIComponent(slug)}`, { credentials: "same-origin",});
+
+        if (res.status === 404) {
+            fail("Solução não encontrada");
+            return;
+        }
+
+        if (!res.ok) {
+            throw new Error("request failed");
+        }
+        solution = await res.json();
+
+    }catch(err) {
+        fail("Não foi possível carregar a solução");
+        return;
+    }
+
+    document.title = `${solution.title} — MaratonUSP Ensina`;
+
+    titleEl.textContent = solution.title;
+    statementEl.textContent = solution.statement;
+    explanationEl.textContent = solution.explanation;
+    codeEl.textContent = solution.code;
+    backEl.href = `/conteudo?topic=${solution.topic_slug}`;
+
+    if (solution.url) {
+        linkEl.href = solution.url;
+    } else {
+        linkBox.style.display = "none";
+    }
+
+})();
+
+</script>
+
+{% endblock %}

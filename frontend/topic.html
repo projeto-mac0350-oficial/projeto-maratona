@@ -11,7 +11,6 @@ Projeto Maratona
 {% block content %}
 
 <div class="bb" id="topic">
-    <a id="topic-back" href="">← Todos os conteúdos</a>
 
     <h1 class="title" id="topic-title">Carregando…</h1>
     <p class="description" id="topic-summary"></p>
@@ -25,6 +24,8 @@ Projeto Maratona
         <h2 class="section-title">Lista de problemas</h2>
         <div id="problems"></div>
     </section>
+
+    <a id="topic-back" href="">← Todos os conteúdos</a>
 </div>
 
 {% endblock %}
@@ -135,9 +136,7 @@ Projeto Maratona
             if (problem.solution_url) {
                 const sol = document.createElement("a");
                 sol.className = "solution-btn";
-                sol.href = problem.solution_url;
-                sol.target = "_blank";
-                sol.rel = "noopener";
+                sol.href = `/solucao?problem=${encodeURIComponent(problem.slug)}`;
                 sol.textContent = "Solução";
                 box.appendChild(sol);
             }

@@ -112,6 +112,18 @@ def init_db():
             )
             """
         )
+        db.execute(
+            """
+            CREATE TABLE IF NOT EXISTS problem_solutions (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                item_id     INTEGER NOT NULL REFERENCES topic_items(id),
+                statement   TEXT,
+                explanation TEXT,
+                code        TEXT,
+                UNIQUE(item_id)
+            )
+            """
+        )
         # Lightweight migration: add columns introduced after a DB was first
         # created (CREATE TABLE IF NOT EXISTS won't alter an existing table).
         existing = {row["name"] for row in db.execute("PRAGMA table_info(topic_items)")}
@@ -190,6 +202,33 @@ SEED_CONTENT = [
                 "url": "https://codeforces.com/problemset/problem/2229/G?mobile=true",
                 "solution_url": "solucao.html",
                 "difficulty": "easy",
+                "solution": {
+                    "statement": """
+                   In an under-construction village, n houses have been built in a row numbered from 1 to n. House i has hospitality hi.
+
+The village has n−1 roads, where road i connects houses i and i+1 and will be built on day di. Initially, no roads are built.
+
+You start at house x and will stay in the village from day 1 to day k, initially with a satisfaction of 0. On day s, the following happens in order:
+
+ -   All roads i with di=s are built;
+  -  You may move to an adjacent house, if the road to it has been built, or stay at your current house;
+   - Your satisfaction increases by hj, where j is the house you are currently at. 
+
+Find the maximum satisfaction you can achieve after k days.
+                    """,
+
+                    "explanation": """
+                    A ideia é usar busca binária porque...
+                    """,
+
+                    "code": """#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    return 0;
+}
+                    """
+                }
             },
             {
                 "slug": "nome-2",
@@ -258,6 +297,49 @@ def seed_content():
                             i_pos,
                         ),
                     )
+                    
+                    # Pega o id do topic_item criado
+                    item_id = db.execute(
+                        """
+                        SELECT id
+                        FROM topic_items
+                        WHERE topic_id = ?
+                        AND kind = ?
+                        AND slug = ?
+                        """,
+                        (
+                            topic_id,
+                            kind,
+                            item["slug"],
+                        ),
+                    ).fetchone()["id"]
+
+
+                    # Se for problema, cria a solução associada
+                    if kind == "problem" and "solution" in item:
+                        db.execute(
+                            """
+                            INSERT INTO problem_solutions
+                                (
+                                    item_id,
+                                    statement,
+                                    explanation,
+                                    code
+                                )
+                            VALUES (?, ?, ?, ?)
+
+                            ON CONFLICT(item_id) DO UPDATE SET
+                                statement   = excluded.statement,
+                                explanation = excluded.explanation,
+                                code        = excluded.code
+                            """,
+                            (
+                                item_id,
+                                item["solution"]["statement"],
+                                item["solution"]["explanation"],
+                                item["solution"]["code"],
+                            ),
+                        )
         db.commit()
 
 
@@ -564,6 +646,46 @@ def conteudos():
 @login_required
 def perfil():
     return render_template("pagina_logado.html")
+
+# --- Solutions -------------------------------------
+
+@app.get("/solucao")
+def solucao():
+    return render_template("solution.html")
+
+@app.get("/solutions/<slug>")
+def get_solution(slug):
+    with closing(get_db()) as db:
+        solution = db.execute(
+            """
+            SELECT 
+                ti.title,
+                ti.url,
+                ps.statement,
+                ps.explanation,
+                ps.code,
+                t.slug AS topic_slug
+            FROM topic_items ti
+            JOIN problem_solutions ps
+                ON ps.item_id = ti.id
+            JOIN topics t
+                ON t.id = ti.topic_id
+            WHERE ti.slug = ?
+            """,
+            (slug,)
+        ).fetchone()
+
+    if solution is None:
+        return jsonify(error="solution not found"), 404
+
+    return jsonify(
+        title=solution["title"],
+        url=solution["url"],
+        statement=solution["statement"],
+        explanation=solution["explanation"],
+        code=solution["code"],
+        topic_slug=solution["topic_slug"]
+    )
 
 # Ensure the schema exists for both `python app.py` and `flask run`.
 init_db()
