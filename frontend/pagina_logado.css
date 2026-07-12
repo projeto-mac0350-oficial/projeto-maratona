@@ -221,6 +221,69 @@
     transform: translateY(-2px);
 }
 
+/*=============================
+Barras de progresso
+===============================*/
+.nivel-linha {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+.nivel-titulo {
+    width: 70px;
+    flex-shrink: 0;
+    font-weight: 500;
+}
+.nivel-seta {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    transition: transform 0.2s ease;
+
+    width: 18px;
+    height: 18px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.barra-wrap { flex: 1; }
+
+.barra-label {
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    color:  var(--muted);
+    margin-bottom: 4px;
+}
+.barra-fundo {
+    background: var(--progress-bg);
+    border-radius: 6px;
+    height: 10px;
+    overflow: hidden;
+}
+.barra-preenchida {
+    height: 100%;
+    background: var(--progress-fill);
+    transition: width 0.3s ease;
+}
+.nivel-detalhe {
+    margin: 8px 0 16px 80px;
+    padding-left: 12px;
+    border-left:  1px solid var(--border);
+}
+.topico-linha { margin-bottom: 8px; }
+.topico-nome {
+    display: block;
+    font-size: 13px;
+    margin-bottom: 4px;
+}
+.nivel-vazio {
+    font-size: 13px;
+    color:var(--muted);
+}
 
 /* ======================
    Responsividade

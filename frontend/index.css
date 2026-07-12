@@ -35,6 +35,9 @@
     --danger: #e74c3c;
     --success: #2ecc71;
     --shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+
+    --progress-bg: #e5e7eb;       
+    --progress-fill: #dc2626; 
 }
 
 [data-theme="dark"] {
@@ -52,6 +55,9 @@
     --primary-light: rgba(239, 68, 68, 0.14);
 
     --shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+
+    --progress-bg: #334155;
+    --progress-fill: #ef4444;
 }
 
 body {
