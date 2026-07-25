@@ -10,45 +10,6 @@
     <link rel="stylesheet" href="/auth-widget.css">
     {% block extra_css %}{% endblock %}
 
-    <!-- Dropdown do menu "Níveis". Só algumas regras pontuais — mova para
-         base.css quando conveniente, não há necessidade de manter isso aqui. -->
-    <style>
-        .nav-dropdown {
-            position: relative;
-            display: inline-block;
-        }
-        .nav-dropdown-menu {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            margin-top: 0.4rem;
-            min-width: 160px;
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-            overflow: hidden;
-            z-index: 20;
-        }
-        .nav-dropdown-menu a {
-            display: block;
-            padding: 0.6rem 1rem;
-            color: var(--text);
-            text-decoration: none;
-            font-size: 0.95rem;
-            white-space: nowrap;
-        }
-        .nav-dropdown-menu a:hover {
-            background: var(--primary);
-            color: #fff;
-        }
-        .nav-dropdown-menu .nav-dropdown-status {
-            display: block;
-            padding: 0.6rem 1rem;
-            color: var(--text-light);
-            font-size: 0.9rem;
-        }
-    </style>
 
     <!-- Apply the saved theme before first paint to avoid a flash. -->
     <script>
@@ -171,7 +132,6 @@ window.addEventListener("auth:change", (e) => {
 });
 </script>
 
-<script src="./calendar.js"></script>
 <script src="./auth-widget.js"></script>
 
 {% block extra_js %}{% endblock %}

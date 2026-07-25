@@ -243,57 +243,6 @@ header h1 {
     border-color: var(--primary);
 }
 
-/* --- Mini calendário (dias logados no mês) --------------------------------- */
-.mini-calendar {
-    margin-top: 22px;
-    padding-top: 18px;
-    border-top: 1px solid var(--border);
-}
-
-.mini-calendar .cal-title {
-    color: var(--text-strong);
-    font-weight: 600;
-    margin-bottom: 10px;
-}
-
-.mini-calendar .cal-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 4px;
-    max-width: 320px;
-}
-
-.mini-calendar .cal-weekday {
-    color: var(--muted);
-    font-size: 12px;
-    font-weight: 600;
-    text-align: center;
-}
-
-.mini-calendar .cal-day {
-    color: var(--text);
-    font-size: 13px;
-    text-align: center;
-    padding: 6px 0;
-    border-radius: 8px;
-}
-
-.mini-calendar .cal-day.logged {
-    background: var(--success);
-    color: #fff;
-    font-weight: 600;
-}
-
-.mini-calendar .cal-day.today {
-    outline: 2px solid var(--primary);
-    outline-offset: -2px;
-}
-
-.mini-calendar .cal-streak {
-    color: var(--text);
-    margin-top: 12px;
-}
-
 /* --- Footer ----------------------------------------------------------------- */
 .site-footer {
     text-align: center;

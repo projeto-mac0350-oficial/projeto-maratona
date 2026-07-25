@@ -6,6 +6,8 @@ MaratonUSP Ensina - Meu painel
 
 {% block extra_css %}
 <link rel="stylesheet" href="pagina_logado.css">
+<link rel="stylesheet" href="heatmap.css">
+<link rel="stylesheet" href="calendar.css">
 {% endblock %}
 
 {% block content %}
@@ -26,7 +28,7 @@ MaratonUSP Ensina - Meu painel
    
     <section>
         <h2>Sua atividade</h2>
-        <div id="heatmap">HEATMAP</div>
+        <div id="heatmap" class="heatmap" aria-label="Heatmap de atividade"></div>
 
     </section>
 
@@ -107,6 +109,11 @@ MaratonUSP Ensina - Meu painel
 
 </div>
 
+{% endblock %}
+{% block extra_js %}
+
+<script src="./calendar.js"></script>
+<script src="./heatmap.js"></script>
 <script>
 /* --- Render das listas de progresso -------------------------------------- */
 function fillList(ul, items, emptyText) {

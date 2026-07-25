@@ -490,6 +490,28 @@ def get_activity():
     )
 
 
+@app.get("/heatmap")
+@login_required
+def get_heatmap():
+    """Per-day count of progress items marked done, keyed by date — powers the
+    profile heatmap. Derived from progress.updated_at, so it reflects the last
+    time each item's done state changed, not a full history of toggles."""
+    with closing(get_db()) as db:
+        rows = db.execute(
+            """
+            SELECT substr(updated_at, 1, 10) AS day, COUNT(*) AS count
+            FROM progress
+            WHERE user_id = ? AND done = 1
+            GROUP BY day
+            """,
+            (session["user_id"],),
+        ).fetchall()
+    return jsonify(
+        today=date.today().isoformat(),
+        counts={row["day"]: row["count"] for row in rows},
+    )
+
+
 @app.get("/progress")
 @login_required
 def get_progress():

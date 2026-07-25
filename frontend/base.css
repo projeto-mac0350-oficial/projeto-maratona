@@ -1,38 +1,79 @@
-*{
+* {
     margin: 0;
     padding: 0;
 }
 
-html, body{
+html,
+body {
     min-height: 100%;
 }
 
-body{
+body {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
     font-family: 'Roboto', sans-serif;
 }
 
-main{
+main {
     flex: 1;
     display: flex;
     flex-direction: column;
     width: 100%;
 }
 
-header h1{
+header h1 {
     margin: 0;
     font-size: 1.7rem;
 }
 
-header  a {
+header a {
     margin: 0;
     font-size: 1.7rem;
     text-decoration: none;
-    color: inherit; 
+    color: inherit;
 }
 
-#conteudo{
+#conteudo {
     width: 100%;
+}
+
+.nav-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.nav-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 0.4rem;
+    min-width: 160px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    z-index: 20;
+}
+
+.nav-dropdown-menu a {
+    display: block;
+    padding: 0.6rem 1rem;
+    color: var(--text);
+    text-decoration: none;
+    font-size: 0.95rem;
+    white-space: nowrap;
+}
+
+.nav-dropdown-menu a:hover {
+    background: var(--primary);
+    color: #fff;
+}
+
+.nav-dropdown-menu .nav-dropdown-status {
+    display: block;
+    padding: 0.6rem 1rem;
+    color: var(--text-light);
+    font-size: 0.9rem;
 }

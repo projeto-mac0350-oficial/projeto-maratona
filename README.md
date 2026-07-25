@@ -16,7 +16,7 @@ projeto-maratona/
 │   ├── index.css           # estilos da homepage (com tokens de tema)
 │   ├── base.html           # layout compartilhado (header, nav, footer, tema); páginas de conteúdo o estendem via Jinja
 │   ├── topic.html          # página de conteúdo genérica, estende base.html (renderiza GET /topics/<slug>)
-│   ├── conteudo.css        # estilos específicos de topic.html
+│   ├── topic.css           # estilos específicos de topic.html
 │   ├── topics_list.html    # listagem em cartões: níveis (sem ?level=) ou tópicos de um nível (?level=<slug>)
 │   ├── topics_list.css
 │   ├── busca_binaria.html  # redireciona p/ /conteudo?topic=busca_binaria (compatibilidade)
@@ -24,6 +24,9 @@ projeto-maratona/
 │   ├── painel.html         # dashboard: progresso do usuário logado
 │   ├── progress.js         # persiste os toggles "lido/resolvido" por usuário
 │   ├── calendar.js         # mini calendário: dias logados no mês + sequência (homepage)
+│   ├── calendar.css        # estilos do mini calendário
+│   ├── heatmap.js          # heatmap de atividade (itens concluídos por dia) no perfil
+│   ├── heatmap.css        # estilos do heatmap
 │   ├── auth-widget.js      # controle de login/logout compartilhado (botão + modal)
 │   ├── auth-widget.css     # estilos do controle de login (tokens com fallback)
 │   ├── base.css            # cabeçalho/identidade visual compartilhada
@@ -62,6 +65,7 @@ start e é ignorado pelo Git. Defina `SECRET_KEY` no ambiente para produção.
 | GET    | `/progress`  | Protegida — progresso do usuário, mapa por `item_key` |
 | POST   | `/progress`  | Protegida — salva `{item_key, kind, label, done}`     |
 | GET    | `/activity`  | Protegida — registra o dia e retorna `{today, streak, days}` (dias logados no mês) |
+| GET    | `/heatmap`   | Protegida — retorna `{today, counts}`: itens de progresso concluídos por dia |
 | GET    | `/levels`    | Lista de níveis (`slug`, `title`) — alimenta o menu "Níveis" |
 | GET    | `/levels/<slug>` | Um nível com seus tópicos (`slug`, `title`, `summary`); `404` se não existe |
 | GET    | `/topics`    | Lista de tópicos de estudo (`slug`, `title`, `summary`) |
@@ -96,6 +100,16 @@ Na homepage, a área do usuário logado mostra um **mini calendário** do mês
 `/login` e `/me`, e `GET /activity` devolve os dias do mês + a sequência), os
 dias registrados aparecem marcados, o dia atual destacado e a **sequência** —
 dias seguidos de acesso — logo abaixo. Sem login o calendário não aparece.
+
+No perfil, a seção "Sua atividade" mostra um **heatmap** (`heatmap.js`) no
+formato clássico: 7 linhas (uma por dia da semana), colunas são semanas
+consecutivas, e o dia de hoje é sempre a última célula da última coluna. Os
+dados vêm de `GET /heatmap`, que conta, por dia, quantos itens de progresso
+foram marcados como concluídos (via `updated_at` da tabela `progress`) — cada
+quadrado fica cinza sem atividade ou num de três tons de verde, mais escuro
+quanto mais itens foram concluídos naquele dia. O número de semanas exibidas e
+os limites de cada tom são constantes no topo do próprio `heatmap.js`, fáceis
+de ajustar.
  
 O conteúdo de estudo vem do banco (tabelas `levels`/`topics`/`topic_items`,
 populadas por `SEED_LEVELS`/`SEED_CONTENT` em `app.py`): cada tópico pertence a

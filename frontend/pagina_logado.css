@@ -49,27 +49,6 @@
 
 
 
-/* ======================
-   Heatmap
-   ====================== */
-
-#heatmap {
-    height: 180px;
-
-    border-radius: 12px;
-
-    border: 2px dashed var(--border);
-
-    background: var(--field-bg);
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    color: var(--text-light);
-
-    font-weight: 600;
-}
 
 /* ======================
    Últimos acessados
