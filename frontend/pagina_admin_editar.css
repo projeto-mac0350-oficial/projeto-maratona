@@ -1,0 +1,396 @@
+/* ======================
+   Editar Conteúdo
+   ====================== */
+
+.admin-edit {
+
+    max-width: 1000px;
+
+    margin: 0 40px;
+
+    padding: 3rem 2rem 5rem;
+
+}
+
+
+/* ======================
+   Cabeçalho
+   ====================== */
+
+.page-header {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 1rem;
+
+    margin-bottom: 2rem;
+
+}
+
+
+.page-header h1 {
+
+    color: var(--primary);
+
+    font-size: 3rem;
+
+    margin: 0;
+
+}
+
+
+.back-button {
+
+    color: var(--primary);
+
+    text-decoration: none;
+
+    font-weight: 600;
+
+    transition: .2s;
+
+}
+
+
+.back-button:hover {
+
+    transform: translateX(-3px);
+
+}
+
+
+/* ======================
+   Seções
+   ====================== */
+
+.admin-edit section {
+
+    background: var(--card-bg);
+
+    border: 1px solid var(--border);
+
+    border-radius: 16px;
+
+    padding: 1.5rem;
+
+    margin-bottom: 1.5rem;
+
+    box-shadow: var(--shadow);
+
+}
+
+
+.admin-edit h2 {
+
+    color: var(--text);
+
+    font-size: 1.4rem;
+
+    margin-bottom: 1rem;
+
+}
+
+
+/* ======================
+   Campos
+   ====================== */
+
+.field {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: .4rem;
+
+    margin-bottom: 1rem;
+
+}
+
+
+.field label {
+
+    color: var(--text);
+
+    font-size: .95rem;
+
+    font-weight: 600;
+
+}
+
+
+.field input,
+.field textarea,
+.field select {
+
+    padding: .7rem .9rem;
+
+    border: 1px solid var(--border);
+
+    border-radius: 10px;
+
+    background: var(--background);
+
+    color: var(--text);
+
+    font-size: .95rem;
+
+    font-family: inherit;
+
+}
+
+
+.field textarea {
+
+    resize: vertical;
+
+}
+
+
+/* ======================
+   Título de seção + botão
+   ====================== */
+
+.section-title {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 1rem;
+
+}
+
+
+.section-title h2 {
+
+    margin: 0;
+
+}
+
+
+/* ======================
+   Botão adicionar
+   ====================== */
+
+.btn-add {
+
+    padding: .6rem 1rem;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: var(--primary);
+
+    color: white;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: .2s;
+
+}
+
+
+.btn-add:hover {
+
+    background: var(--primary-dark);
+
+}
+
+
+/* ======================
+   Cards de referência/problema
+   ====================== */
+
+
+
+.reference-card input,
+.problem-card input,
+.problem-card textarea {
+
+    padding: .7rem .9rem;
+
+    border: 1px solid var(--border);
+
+    border-radius: 10px;
+
+    background: var(--card-bg);
+
+    color: var(--text);
+
+    font-size: .95rem;
+
+    font-family: inherit;
+
+}
+
+
+.problem-card textarea {
+
+    resize: vertical;
+
+}
+
+
+/* ======================
+   Botão remover
+   ====================== */
+
+.btn-delete {
+
+    align-self: flex-start;
+
+    padding: .5rem .9rem;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: #dc2626;
+
+    color: white;
+
+    cursor: pointer;
+
+    font-size: .9rem;
+
+    transition: .2s;
+
+}
+
+
+.btn-delete:hover {
+
+    background: #b91c1c;
+
+}
+
+
+/* ======================
+   Salvar
+   ====================== */
+
+.footer-actions {
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    margin-top: 1rem;
+
+}
+
+
+.btn-save {
+
+    padding: .9rem 1.5rem;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background: var(--primary);
+
+    color: white;
+
+    font-size: 1rem;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: .2s;
+
+}
+
+
+.btn-save:hover {
+
+    background: var(--primary-dark);
+
+    transform: translateY(-2px);
+
+}
+
+.reference-header,
+.problem-header {
+
+    cursor: pointer;
+    padding: 15px;
+
+    display: flex;
+    gap: 10px;
+    align-items: center;
+
+}
+
+.reference-content,
+.problem-content {
+
+    padding: 20px;
+
+}
+
+
+.hidden {
+
+    display: none;
+
+}
+
+.reference-card,
+.problem-card {
+
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+
+}
+
+.reference-header:hover,
+.problem-header:hover {
+
+    background: rgba(0,0,0,0.03);
+
+}
+
+/* ======================
+   Responsividade
+   ====================== */
+
+@media (max-width: 768px) {
+
+
+    .admin-edit {
+
+        padding: 2rem 1rem;
+
+    }
+
+
+    .page-header h1 {
+
+        font-size: 2.2rem;
+
+    }
+
+
+    .section-title {
+
+        flex-direction: column;
+
+        align-items: flex-start;
+
+        gap: .8rem;
+
+    }
+
+}

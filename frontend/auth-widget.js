@@ -96,6 +96,7 @@
         const headerUsername = mount.querySelector("#header-username");
         const logoutBtn = mount.querySelector("#logout-btn");
         const btnPerfil = document.getElementById("btn-logado");
+        const btnAdmin = document.getElementById("btn-admin");
       
         const forms = {
             login: dialog.querySelector("#login-form"),
@@ -108,23 +109,35 @@
             window.dispatchEvent(new CustomEvent("auth:change", { detail: { user: user || null } }));
         }
 
-        function setLoggedIn(username) {
+        function setLoggedIn(user) {
           
-            headerUsername.textContent = username;
+            headerUsername.textContent = user.username;
+
             signinBtn.classList.add("auth-hidden");
             greeting.classList.remove("auth-hidden");
             logoutBtn.classList.remove("auth-hidden");
 
             if (btnPerfil) {
-               btnPerfil.classList.remove("hidden");
-               
+                btnPerfil.classList.remove("hidden");
+            }
+
+            if (btnAdmin) {
+                if (user.is_admin) {
+                    btnAdmin.classList.remove("hidden");
+                } else {
+                    btnAdmin.classList.add("hidden");
+                }
             }
 
             if (dialog.open) dialog.close();
-            emit({ username });
+
+            emit(user);
         }
 
         function setLoggedOut() {
+            if (btnAdmin) {
+                btnAdmin.classList.add("hidden");
+            }
             signinBtn.classList.remove("auth-hidden");
             greeting.classList.add("auth-hidden");
             logoutBtn.classList.add("auth-hidden");
@@ -172,7 +185,7 @@
                 if (ok) {
                     forms.login.reset();
                     showMessage(loginMsg, "", null);
-                    setLoggedIn(data.username);
+                    setLoggedIn(data);
                 } else if (status === 401) {
                     showMessage(loginMsg, "Usuário ou senha inválidos.", "error");
                 } else {
@@ -210,7 +223,7 @@
                 if (login.ok) {
                     forms.register.reset();
                     showMessage(registerMsg, "", null);
-                    setLoggedIn(login.data.username);
+                    setLoggedIn(login.data);
                 } else {
                     showMessage(registerMsg, "Conta criada. Faça login para entrar.", "success");
                 }
@@ -237,7 +250,7 @@
                 const res = await fetch("/me", { credentials: "same-origin" });
                 if (res.ok) {
                     const data = await res.json();
-                    setLoggedIn(data.username);
+                    setLoggedIn(data);
                     return;
                 }
             } catch (err) {
