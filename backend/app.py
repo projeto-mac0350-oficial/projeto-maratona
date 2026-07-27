@@ -4,7 +4,7 @@ from contextlib import closing
 from datetime import date, timedelta
 from functools import wraps
 
-from flask import Flask, jsonify, request, session, render_template
+from flask import Flask, jsonify, request, session, render_template, redirect
 from werkzeug.security import check_password_hash, generate_password_hash
 
 DATABASE = "users.db"
@@ -34,10 +34,21 @@ def init_db():
             CREATE TABLE IF NOT EXISTS users (
                 id            INTEGER PRIMARY KEY AUTOINCREMENT,
                 username      TEXT UNIQUE NOT NULL,
-                password_hash TEXT NOT NULL
+                password_hash TEXT NOT NULL,
+                is_admin INTEGER NOT NULL DEFAULT 0
             )
             """
         )
+        cols = {
+            row["name"]
+            for row in db.execute("PRAGMA table_info(users)")
+        }
+
+        if "is_admin" not in cols:
+            db.execute("""
+                ALTER TABLE users
+                ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0
+            """)
         # Per-user study progress. The content pages are static, so they supply
         # the item identity (item_key) and a human label; the backend just stores
         # the checked/unchecked state per user. kind ("ref" | "problem") lets the
@@ -371,6 +382,31 @@ def login_required(view):
 
     return wrapped
 
+def admin_required(view):
+    """Permite acesso apenas para administradores."""
+
+    @wraps(view)
+    def wrapped(*args, **kwargs):
+
+        if session.get("user_id") is None:
+            return jsonify(error="authentication required"), 401
+
+        with closing(get_db()) as db:
+            user = db.execute(
+                """
+                SELECT is_admin
+                FROM users
+                WHERE id = ?
+                """,
+                (session["user_id"],),
+            ).fetchone()
+
+        if user is None or user["is_admin"] == 0:
+            return jsonify(error="admin only"), 403
+
+        return view(*args, **kwargs)
+
+    return wrapped
 
 def record_login_day(user_id):
     """Mark today (server-local) as a day this user was active (idempotent)."""
@@ -438,12 +474,17 @@ def login():
     data = request.get_json(silent=True) or {}
     username = (data.get("username") or "").strip()
     password = data.get("password") or ""
+
     if not username or not password:
         return jsonify(error="username and password are required"), 400
 
     with closing(get_db()) as db:
         user = db.execute(
-            "SELECT id, username, password_hash FROM users WHERE username = ?",
+            """
+            SELECT id, username, password_hash, is_admin
+            FROM users
+            WHERE username = ?
+            """,
             (username,),
         ).fetchone()
 
@@ -453,9 +494,14 @@ def login():
     session.clear()
     session["user_id"] = user["id"]
     session["username"] = user["username"]
-    record_login_day(user["id"])
-    return jsonify(username=user["username"])
 
+    record_login_day(user["id"])
+
+    return jsonify(
+        id=user["id"],
+        username=user["username"],
+        is_admin=bool(user["is_admin"])
+    )
 
 @app.post("/logout")
 def logout():
@@ -467,7 +513,22 @@ def logout():
 @login_required
 def me():
     record_login_day(session["user_id"])
-    return jsonify(id=session["user_id"], username=session["username"])
+
+    with closing(get_db()) as db:
+        user = db.execute(
+            """
+            SELECT is_admin
+            FROM users
+            WHERE id = ?
+            """,
+            (session["user_id"],),
+        ).fetchone()
+
+    return jsonify(
+        id=session["user_id"],
+        username=session["username"],
+        is_admin=bool(user["is_admin"]),
+    )
 
 
 @app.get("/activity")
@@ -760,10 +821,591 @@ def conteudos():
     """Serve the topics list page (cards linking to /conteudo?topic=<slug>)."""
     return render_template("topics_list.html")
 
+
+# ---- Perfil ------------------------------------------------------------
+
 @app.get("/perfil")
 @login_required
 def perfil():
-    return render_template("pagina_logado.html")
+
+    with closing(get_db()) as db:
+        admin = db.execute(
+            """
+            SELECT is_admin
+            FROM users
+            WHERE id = ?
+            """,
+            (session["user_id"],),
+        ).fetchone()
+
+    return render_template(
+        "pagina_logado.html",
+        is_admin=bool(admin["is_admin"])
+    )
+
+@app.get("/admin")
+@login_required
+@admin_required
+def admin():
+    return render_template("pagina_admin.html")
+
+def _slugify(text):
+    """Same convention used elsewhere in this file for problem/reference
+    slugs: lowercase, spaces -> hyphens. Good enough for the short titles
+    coming out of the admin forms."""
+    return text.strip().lower().replace(" ", "-")
+
+
+def _unique_topic_slug(db, base_slug):
+    """Append -2, -3, ... to base_slug until it doesn't collide with an
+    existing topic (topics.slug is UNIQUE)."""
+    slug = base_slug
+    suffix = 2
+    while db.execute(
+        "SELECT 1 FROM topics WHERE slug = ?", (slug,)
+    ).fetchone() is not None:
+        slug = f"{base_slug}-{suffix}"
+        suffix += 1
+    return slug
+
+
+@app.get("/admin/topics/new")
+@login_required
+@admin_required
+def admin_new():
+    with closing(get_db()) as db:
+        levels = db.execute(
+            """
+            SELECT slug, title
+            FROM levels
+            ORDER BY position
+            """
+        ).fetchall()
+
+    return render_template(
+        "pagina_admin_novo.html",
+        levels=levels,
+    )
+
+
+@app.post("/admin/topics/new")
+@login_required
+@admin_required
+def admin_create():
+
+    title = (request.form.get("title") or "").strip()
+    summary = request.form.get("summary")
+    level = request.form.get("level")
+
+    if not title:
+        return "O título é obrigatório", 400
+
+    with closing(get_db()) as db:
+
+        level_row = db.execute(
+            "SELECT id FROM levels WHERE slug = ?", (level,)
+        ).fetchone()
+        level_id = level_row["id"] if level_row else None
+
+        slug = _unique_topic_slug(db, _slugify(title))
+
+        # Cria o tópico
+        next_position = db.execute(
+            "SELECT COALESCE(MAX(position) + 1, 0) FROM topics"
+        ).fetchone()[0]
+
+        cursor = db.execute(
+            """
+            INSERT INTO topics (slug, title, summary, level_id, position)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (slug, title, summary, level_id, next_position),
+        )
+        topic_id = cursor.lastrowid
+
+        # Referências
+        new_ref_titles = request.form.getlist("new_ref_title")
+        new_ref_urls = request.form.getlist("new_ref_url")
+
+        for i in range(len(new_ref_titles)):
+
+            if not new_ref_titles[i].strip():
+                continue
+
+            ref_slug = _slugify(new_ref_titles[i])
+
+            db.execute(
+                """
+                INSERT INTO topic_items
+                (topic_id, kind, slug, title, url, position)
+                VALUES (?, 'ref', ?, ?, ?, ?)
+                """,
+                (topic_id, ref_slug, new_ref_titles[i], new_ref_urls[i], i),
+            )
+
+        # Problemas
+        new_titles = request.form.getlist("new_problem_title")
+        new_urls = request.form.getlist("new_problem_url")
+        new_difficulties = request.form.getlist("new_problem_difficulty")
+        new_statements = request.form.getlist("new_problem_statement")
+        new_explanations = request.form.getlist("new_problem_explanation")
+        new_codes = request.form.getlist("new_problem_code")
+
+        for i in range(len(new_titles)):
+
+            if not new_titles[i].strip():
+                continue
+
+            problem_slug = _slugify(new_titles[i])
+
+            cursor = db.execute(
+                """
+                INSERT INTO topic_items
+                (topic_id, kind, slug, title, url, solution_url, difficulty, position)
+                VALUES (?, 'problem', ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    topic_id,
+                    problem_slug,
+                    new_titles[i],
+                    new_urls[i],
+                    "solucao.html",
+                    new_difficulties[i],
+                    i,
+                ),
+            )
+
+            item_id = cursor.lastrowid
+
+            db.execute(
+                """
+                INSERT INTO problem_solutions
+                (item_id, statement, explanation, code)
+                VALUES (?, ?, ?, ?)
+                """,
+                (
+                    item_id,
+                    new_statements[i],
+                    new_explanations[i],
+                    new_codes[i],
+                ),
+            )
+
+        db.commit()
+
+    return redirect("/admin")
+
+
+@app.get("/admin/topics/<slug>/edit")
+@login_required
+@admin_required
+def admin_edit(slug):
+
+    with closing(get_db()) as db:
+
+        topic = db.execute(
+            """
+            SELECT 
+                t.id,
+                t.slug,
+                t.title,
+                t.summary,
+                l.slug AS level
+            FROM topics t
+            LEFT JOIN levels l
+                ON l.id = t.level_id
+            WHERE t.slug = ?
+            """,
+            (slug,)
+        ).fetchone()
+
+
+        if topic is None:
+            return "Conteúdo não encontrado", 404
+
+
+        references = db.execute(
+            """
+            SELECT *
+            FROM topic_items
+            WHERE topic_id = ?
+            AND kind = 'ref'
+            ORDER BY position
+            """,
+            (topic["id"],)
+        ).fetchall()
+
+
+        problems = db.execute(
+            """
+            SELECT
+                ti.id,
+                ti.slug,
+                ti.title,
+                ti.url,
+                ti.difficulty,
+                ps.statement,
+                ps.explanation,
+                ps.code
+            FROM topic_items ti
+            LEFT JOIN problem_solutions ps
+                ON ps.item_id = ti.id
+            WHERE ti.topic_id = ?
+            AND ti.kind = 'problem'
+            ORDER BY ti.position
+            """,
+            (topic["id"],)
+        ).fetchall()
+
+
+        levels = db.execute(
+            """
+            SELECT slug, title
+            FROM levels
+            ORDER BY position
+            """
+        ).fetchall()
+
+
+    return render_template(
+        "pagina_admin_editar.html",
+        topic=topic,
+        references=references,
+        problems=problems,
+        levels=levels
+    )
+
+@app.post("/admin/topics/<slug>/edit")
+@login_required
+@admin_required
+def admin_update(slug):
+
+    title = request.form["title"]
+    summary = request.form["summary"]
+    level = request.form["level"]
+
+    with closing(get_db()) as db:
+        topic_row = db.execute(
+            """
+            SELECT id
+            FROM topics
+            WHERE slug = ?
+            """,
+            (slug,)
+        ).fetchone()
+
+        topic_id = topic_row["id"]
+
+        level_id = db.execute(
+            """
+            SELECT id FROM levels
+            WHERE slug = ?
+            """,
+            (level,)
+        ).fetchone()["id"]
+
+
+        # Atualiza tópico
+        db.execute(
+            """
+            UPDATE topics
+            SET title = ?,
+                summary = ?,
+                level_id = ?
+            WHERE slug = ?
+            """,
+            (
+                title,
+                summary,
+                level_id,
+                slug
+            )
+        )
+
+
+        # Atualiza problemas
+        problem_ids = request.form.getlist("problem_id")
+        titles = request.form.getlist("problem_title")
+        urls = request.form.getlist("problem_url")
+        difficulties = request.form.getlist("problem_difficulty")
+        statements = request.form.getlist("problem_statement")
+        explanations = request.form.getlist("problem_explanation")
+        codes = request.form.getlist("problem_code")
+
+
+        for i, problem_id in enumerate(problem_ids):
+
+            db.execute(
+                """
+                UPDATE topic_items
+                SET title = ?,
+                    url = ?,
+                    difficulty = ?
+                WHERE id = ?
+                """,
+                (
+                    titles[i],
+                    urls[i],
+                    difficulties[i],
+                    problem_id
+                )
+            )
+
+
+            db.execute(
+                """
+                UPDATE problem_solutions
+                SET statement = ?,
+                    explanation = ?,
+                    code = ?
+                WHERE item_id = ?
+                """,
+                (
+                    statements[i],
+                    explanations[i],
+                    codes[i],
+                    problem_id
+                )
+            )
+
+        new_titles = request.form.getlist("new_problem_title")
+        new_urls = request.form.getlist("new_problem_url")
+        new_difficulties = request.form.getlist("new_problem_difficulty")
+        new_statements = request.form.getlist("new_problem_statement")
+        new_explanations = request.form.getlist("new_problem_explanation")
+        new_codes = request.form.getlist("new_problem_code")
+
+
+        for i in range(len(new_titles)):
+
+            # ignora campos vazios
+            if not new_titles[i].strip():
+                continue
+
+
+            problem_slug = new_titles[i].lower().replace(" ", "-")
+
+
+            # pega a próxima posição disponível
+            next_position = db.execute(
+                """
+                SELECT COALESCE(MAX(position) + 1, 0)
+                FROM topic_items
+                WHERE topic_id = ?
+                AND kind = 'problem'
+                """,
+                (topic_id,)
+            ).fetchone()[0]
+
+
+            cursor = db.execute(
+                """
+                INSERT INTO topic_items
+                (
+                    topic_id,
+                    kind,
+                    slug,
+                    title,
+                    url,
+                    solution_url,
+                    difficulty,
+                    position
+                )
+                VALUES (?, 'problem', ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    topic_id,
+                    problem_slug,
+                    new_titles[i],
+                    new_urls[i],
+                    "solucao.html",
+                    new_difficulties[i],
+                    next_position
+                )
+            )
+
+
+            item_id = cursor.lastrowid
+
+
+            db.execute(
+                """
+                INSERT INTO problem_solutions
+                (
+                    item_id,
+                    statement,
+                    explanation,
+                    code
+                )
+                VALUES (?, ?, ?, ?)
+                """,
+                (
+                    item_id,
+                    new_statements[i],
+                    new_explanations[i],
+                    new_codes[i]
+                )
+            )
+
+        new_ref_titles = request.form.getlist("new_ref_title")
+        new_ref_urls = request.form.getlist("new_ref_url")
+
+
+        for i in range(len(new_ref_titles)):
+
+            if not new_ref_titles[i].strip():
+                continue
+
+
+            ref_slug = (
+                new_ref_titles[i]
+                .lower()
+                .replace(" ", "-")
+            )
+
+
+            next_position = db.execute(
+                """
+                SELECT COALESCE(MAX(position)+1,0)
+                FROM topic_items
+                WHERE topic_id = ?
+                AND kind = 'ref'
+                """,
+                (topic_id,)
+            ).fetchone()[0]
+
+
+            db.execute(
+                """
+                INSERT INTO topic_items
+                (
+                    topic_id,
+                    kind,
+                    slug,
+                    title,
+                    url,
+                    position
+                )
+                VALUES (?, 'ref', ?, ?, ?, ?)
+                """,
+                (
+                    topic_id,
+                    ref_slug,
+                    new_ref_titles[i],
+                    new_ref_urls[i],
+                    next_position
+                )
+            )
+
+        db.commit()
+
+
+    return redirect("/admin")
+
+@app.get("/admin/topics")
+@login_required
+@admin_required
+def admin_topics():
+
+    with closing(get_db()) as db:
+
+        rows = db.execute(
+            """
+            SELECT
+                t.slug,
+                t.title,
+                l.title AS level
+            FROM topics t
+            JOIN levels l
+                ON l.id = t.level_id
+            ORDER BY l.position, t.position
+            """
+        ).fetchall()
+
+    return jsonify([dict(r) for r in rows])
+
+@app.delete("/admin/topics/<slug>")
+@login_required
+@admin_required
+def delete_topic(slug):
+    """Apaga o tópico e tudo que depende dele (itens e soluções)."""
+
+    with closing(get_db()) as db:
+
+        topic = db.execute(
+            "SELECT id FROM topics WHERE slug = ?", (slug,)
+        ).fetchone()
+
+        if topic is None:
+            return jsonify(error="topic not found"), 404
+
+        topic_id = topic["id"]
+
+        item_ids = [
+            row["id"]
+            for row in db.execute(
+                "SELECT id FROM topic_items WHERE topic_id = ?", (topic_id,)
+            ).fetchall()
+        ]
+
+        for item_id in item_ids:
+            db.execute(
+                "DELETE FROM problem_solutions WHERE item_id = ?", (item_id,)
+            )
+
+        db.execute("DELETE FROM topic_items WHERE topic_id = ?", (topic_id,))
+        db.execute("DELETE FROM topics WHERE id = ?", (topic_id,))
+
+        db.commit()
+
+    return jsonify(success=True)
+
+@app.delete("/admin/problems/<int:problem_id>")
+@login_required
+@admin_required
+def delete_problem(problem_id):
+
+    with closing(get_db()) as db:
+
+        db.execute(
+            """
+            DELETE FROM problem_solutions
+            WHERE item_id = ?
+            """,
+            (problem_id,)
+        )
+
+        db.execute(
+            """
+            DELETE FROM topic_items
+            WHERE id = ?
+            """,
+            (problem_id,)
+        )
+
+        db.commit()
+
+    return jsonify(success=True)
+
+@app.delete("/admin/references/<int:ref_id>")
+@login_required
+@admin_required
+def delete_reference(ref_id):
+
+    with closing(get_db()) as db:
+
+        db.execute(
+            """
+            DELETE FROM topic_items
+            WHERE id = ?
+            AND kind = 'ref'
+            """,
+            (ref_id,)
+        )
+
+        db.commit()
+
+    return jsonify(success=True)
 
 # --- Solutions -------------------------------------
 

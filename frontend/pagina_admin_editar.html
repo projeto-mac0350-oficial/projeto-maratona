@@ -1,0 +1,742 @@
+{% extends "base.html" %}
+
+{% block title %}
+Editar Conteúdo
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/pagina_admin_editar.css">
+{% endblock %}
+
+{% block content %}
+
+<div class="admin-edit">
+
+    <div class="page-header">
+
+        <a href="/admin" class="back-button">
+            ← Voltar
+        </a>
+
+        <h1>Editar Conteúdo</h1>
+
+    </div>
+
+    <form method="POST">
+
+        <!-- ==========================
+             Informações
+        =========================== -->
+
+        <section>
+
+            <h2>Informações Gerais</h2>
+
+            <div class="field">
+
+                <label>Título</label>
+
+                <input
+                    type="text"
+                    name="title"
+                    value="{{ topic.title }}"
+                >
+
+            </div>
+
+            <div class="field">
+
+                <label>Slug</label>
+
+               <input
+                    type="text"
+                    value="{{ topic.slug }}"
+                    disabled
+                >
+
+            </div>
+
+            <div class="field">
+
+                <select name="level">
+
+                    {% for l in levels %}
+
+                    <option
+                        value="{{ l.slug }}"
+                        {% if l.slug == topic.level %}
+                        selected
+                        {% endif %}
+                    >
+                        {{ l.title }}
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+            <div class="field">
+
+                <label>Resumo</label>
+
+                <textarea 
+                    rows="5"
+                    name="summary"
+                >{{ topic.summary }}</textarea>
+
+            </div>
+
+        </section>
+
+        <!-- ==========================
+             Referências
+        =========================== -->
+
+        <section>
+
+            <div class="section-title">
+
+                <h2>Referências</h2>
+
+               <button
+                    type="button"
+                    class="btn-add"
+                    onclick="addReference()"
+                >
+                    + Nova referência
+                </button>
+
+            </div>
+
+            <div id="references-container">
+
+            {% for ref in references %}
+
+            <div class="reference-card">
+
+                <div 
+                    class="reference-header"
+                    onclick="toggleReference(this)"
+                >
+
+                    <span>▶</span>
+
+                    <strong>
+                        {{ ref.title }}
+                    </strong>
+
+                </div>
+
+
+                <div class="reference-content hidden">
+
+                    <input
+                        type="hidden"
+                        name="ref_id"
+                        value="{{ ref.id }}"
+                    >
+
+                    <div class="field">
+
+                        <label>Nome</label>
+
+                        <input
+                            type="text"
+                            name="ref_title"
+                            value="{{ ref.title }}"
+                        >
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>URL</label>
+
+                        <input
+                            type="url"
+                            name="ref_url"
+                            value="{{ ref.url or '' }}"
+                        >
+
+                    </div>
+
+
+                    <div class="card-actions">
+
+                        <button
+                            type="button"
+                            class="btn-delete"
+                            onclick="deleteReference('{{ ref.id }}', this)"
+                        >
+                            Remover
+                        </button>
+
+                        <button
+                            type="button"
+                            class="btn-save-inline"
+                            onclick="closeCard(this)"
+                        >
+                            Salvar
+                        </button>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+            </div>
+
+        </section>
+
+        <!-- ==========================
+             Problemas
+        =========================== -->
+
+        <section>
+
+            <div class="section-title">
+
+                <h2>Problemas</h2>
+
+                <button
+                    type="button"
+                    class="btn-add"
+                    onclick="addProblem()"
+                >
+                    + Novo problema
+                </button>
+
+            </div>
+
+
+            <div id="problems-container">
+
+            {% for problem in problems %}
+
+            <div class="problem-card">
+
+
+                <!-- Cabeçalho clicável -->
+                <div 
+                    class="problem-header"
+                    onclick="toggleProblem(this)"
+                >
+
+                    <span>▶</span>
+
+                    <strong>
+                        {{ problem.title }}
+                    </strong>
+
+                </div>
+
+
+                <!-- Conteúdo escondido -->
+                <div class="problem-content hidden">
+
+                    <input
+                        type="hidden"
+                        name="problem_id"
+                        value="{{ problem.id }}"
+                    >
+
+
+                    <div class="field">
+
+                        <label>Nome</label>
+
+                        <input
+                            type="text"
+                            name="problem_title"
+                            value="{{ problem.title }}"
+                        >
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>Slug</label>
+
+                        <input
+                            type="text"
+                            value="{{ problem.slug }}"
+                            disabled
+                        >
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>URL</label>
+
+                        <input
+                            type="url"
+                            name="problem_url"
+                            value="{{ problem.url or '' }}"
+                        >
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>Dificuldade</label>
+
+                        <select name="problem_difficulty">
+
+                            <option
+                                value="easy"
+                                {% if problem.difficulty == "easy" %}
+                                selected
+                                {% endif %}
+                            >
+                                Fácil
+                            </option>
+
+
+                            <option
+                                value="medium"
+                                {% if problem.difficulty == "medium" %}
+                                selected
+                                {% endif %}
+                            >
+                                Médio
+                            </option>
+
+
+                            <option
+                                value="hard"
+                                {% if problem.difficulty == "hard" %}
+                                selected
+                                {% endif %}
+                            >
+                                Difícil
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>Enunciado</label>
+
+                        <textarea
+                            rows="8"
+                            name="problem_statement"
+                        >{{ problem.statement or '' }}</textarea>
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>Explicação</label>
+
+                        <textarea
+                            rows="8"
+                            name="problem_explanation"
+                        >{{ problem.explanation or '' }}</textarea>
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>Código</label>
+
+                        <textarea
+                            rows="15"
+                            name="problem_code"
+                        >{{ problem.code or '' }}</textarea>
+
+                    </div>
+
+
+                    <div class="card-actions">
+
+                        <button
+                            type="button"
+                            class="btn-delete"
+                            onclick="deleteProblem('{{ problem.id }}', this)"
+                        >
+                            Remover
+                        </button>
+
+                        <button
+                            type="button"
+                            class="btn-save-inline"
+                            onclick="closeCard(this)"
+                        >
+                            Salvar
+                        </button>
+
+                    </div>
+
+
+                </div>
+
+
+            </div>
+
+
+            {% endfor %}
+            </div>
+
+
+        </section>
+
+        <div class="footer-actions">
+
+            <button
+                class="btn-save"
+                type="submit"
+            >
+                Salvar Alterações
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+
+<script>
+
+
+function toggleProblem(element){
+
+    const content = element.nextElementSibling;
+    const arrow = element.querySelector("span");
+
+    content.classList.toggle("hidden");
+
+    if(content.classList.contains("hidden")){
+        arrow.textContent = "▶";
+    } else {
+        arrow.textContent = "▼";
+    }
+
+}
+
+function toggleReference(element){
+
+    const content = element.nextElementSibling;
+    const arrow = element.querySelector("span");
+
+    content.classList.toggle("hidden");
+
+    if(content.classList.contains("hidden")){
+        arrow.textContent = "▶";
+    } else {
+        arrow.textContent = "▼";
+    }
+
+}
+
+// Fecha a aba do card (não envia o formulário) — usado pelo botão "Salvar"
+// dentro de cada referência/problema, tanto novos quanto já existentes.
+function closeCard(button){
+
+    const card = button.closest(".reference-card, .problem-card");
+    const header = card.querySelector(".reference-header, .problem-header");
+    const content = header.nextElementSibling;
+    const arrow = header.querySelector("span");
+
+    content.classList.add("hidden");
+    arrow.textContent = "▶";
+
+}
+
+// Atualiza o título mostrado no cabeçalho do card em tempo real, conforme o
+// campo "Nome" é digitado.
+function bindTitleSync(card, titleInputName, fallbackText){
+
+    const titleInput = card.querySelector(`[name="${titleInputName}"]`);
+    const headerTitle = card.querySelector(".reference-header strong, .problem-header strong");
+
+    if(!titleInput || !headerTitle){
+        return;
+    }
+
+    titleInput.addEventListener("input", () => {
+        headerTitle.textContent = titleInput.value.trim() || fallbackText;
+    });
+
+}
+
+// Liga a sincronização de título nos cards já renderizados pelo servidor.
+document.querySelectorAll(".reference-card").forEach((card) => {
+    bindTitleSync(card, "ref_title", "Nova referência");
+});
+
+document.querySelectorAll(".problem-card").forEach((card) => {
+    bindTitleSync(card, "problem_title", "Novo problema");
+});
+
+function deleteProblem(id, button){
+
+    const confirmed = confirm(
+        "Tem certeza que deseja remover este problema?"
+    );
+
+    if(!confirmed){
+        return;
+    }
+
+    fetch(`/admin/problems/${id}`, {
+        method: "DELETE"
+    })
+    .then(response => {
+        if(response.ok){
+            button.closest(".problem-card").remove();
+        }
+    });
+
+}
+
+async function deleteReference(refId, button){
+
+    const confirmed = confirm(
+        "Tem certeza que deseja remover esta referência?"
+    );
+
+    if(!confirmed){
+        return;
+    }
+
+    const response = await fetch(
+        `/admin/references/${refId}`, {
+            method: "DELETE"
+        }
+    );
+
+    if(response.ok){
+        button.closest(".reference-card").remove();
+    } else {
+        alert("Erro ao remover referência");
+    }
+
+}
+
+function addProblem(){
+
+    const container = document.getElementById(
+        "problems-container"
+    );
+
+
+    const card = document.createElement("div");
+
+    card.className = "problem-card";
+
+
+    card.innerHTML = `
+
+        <div class="problem-header" onclick="toggleProblem(this)">
+            <span>▼</span>
+            <strong>
+                Novo problema
+            </strong>
+        </div>
+
+
+        <div class="problem-content">
+
+            <div class="field">
+                <label>Nome</label>
+                <input
+                    type="text"
+                    name="new_problem_title"
+                    value=""
+                >
+            </div>
+
+
+            <div class="field">
+                <label>URL</label>
+                <input
+                    type="url"
+                    name="new_problem_url"
+                >
+            </div>
+
+
+            <div class="field">
+                <label>Dificuldade</label>
+                <select name="new_problem_difficulty">
+                    <option value="easy">
+                        Fácil
+                    </option>
+
+                    <option value="medium">
+                        Médio
+                    </option>
+
+                    <option value="hard">
+                        Difícil
+                    </option>
+                </select>
+
+            </div>
+
+
+            <div class="field">
+                <label>Enunciado</label>
+                <textarea
+                    name="new_problem_statement"
+                ></textarea>
+            </div>
+
+
+            <div class="field">
+                <label>Explicação</label>
+                <textarea
+                    name="new_problem_explanation"
+                ></textarea>
+            </div>
+
+
+            <div class="field">
+
+                <label>Código</label>
+
+                <textarea
+                    name="new_problem_code"
+                ></textarea>
+
+            </div>
+
+
+            <div class="card-actions">
+
+                <button
+                    type="button"
+                    class="btn-delete"
+                    onclick="this.closest('.problem-card').remove()"
+                >
+                    Remover
+                </button>
+
+                <button
+                    type="button"
+                    class="btn-save-inline"
+                    onclick="closeCard(this)"
+                >
+                    Salvar
+                </button>
+
+            </div>
+
+
+        </div>
+
+    `;
+
+    container.appendChild(card);
+
+    bindTitleSync(card, "new_problem_title", "Novo problema");
+
+}
+
+function addReference(){
+
+    const container = document.getElementById(
+        "references-container"
+    );
+
+
+    const card = document.createElement("div");
+
+    card.className = "reference-card";
+
+
+    card.innerHTML = `
+
+        <div class="reference-header"
+             onclick="toggleReference(this)">
+
+            <span>▼</span>
+
+            <strong>
+                Nova referência
+            </strong>
+
+        </div>
+
+
+        <div class="reference-content">
+
+
+            <div class="field">
+
+                <label>Nome</label>
+
+                <input
+                    type="text"
+                    name="new_ref_title"
+                >
+
+            </div>
+
+
+            <div class="field">
+
+                <label>URL</label>
+
+                <input
+                    type="url"
+                    name="new_ref_url"
+                >
+
+            </div>
+
+
+            <div class="card-actions">
+
+                <button
+                    type="button"
+                    class="btn-delete"
+                    onclick="this.closest('.reference-card').remove()"
+                >
+                    Remover
+                </button>
+
+                <button
+                    type="button"
+                    class="btn-save-inline"
+                    onclick="closeCard(this)"
+                >
+                    Salvar
+                </button>
+
+            </div>
+
+
+        </div>
+
+    `;
+
+
+    container.appendChild(card);
+
+    bindTitleSync(card, "new_ref_title", "Nova referência");
+
+}
+
+</script>
+
+{% endblock %}

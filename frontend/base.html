@@ -40,6 +40,7 @@
                 <div class="nav-dropdown-menu" id="niveis-menu" hidden></div>
             </div>
             <a href="/perfil" id="btn-logado" class="nav-button hidden">Perfil</a>
+            <a href="/admin" id="btn-admin" class="nav-button hidden">Admin</a>
             <button id="theme-toggle" type="button">🌙 Escuro</button>
         </div>
     </nav>
@@ -115,24 +116,10 @@ document.addEventListener("click", (e) => {
     }
 });
 
-/* --- Painel do usuário: reage ao login/logout do auth-widget -------------- */
-const accountCard = document.getElementById("account-card");
-const btnLogado = document.getElementById("btn-logado");
 
-window.addEventListener("auth:change", (e) => {
-    const user = e.detail.user;
-
-  
-    if (user) {
-        document.getElementById("account-username").textContent = user.username;
-        accountCard.classList.remove("hidden");
-    } else {
-        accountCard.classList.add("hidden");
-    }
-});
 </script>
 
-<script src="./auth-widget.js"></script>
+<script src="/auth-widget.js"></script>
 
 {% block extra_js %}{% endblock %}
 

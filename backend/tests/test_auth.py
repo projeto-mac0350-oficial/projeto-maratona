@@ -47,7 +47,7 @@ def test_login_with_valid_credentials(client):
     client.post("/register", json={"username": "alice", "password": "secret"})
     res = client.post("/login", json={"username": "alice", "password": "secret"})
     assert res.status_code == 200
-    assert res.get_json() == {"username": "alice"}
+    assert res.get_json() == {"id": 1, "username": "alice", "is_admin": 0}
 
 
 def test_login_with_wrong_password_is_unauthorized(client):

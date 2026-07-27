@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+
+{% block title %}
+MaratonUSP Ensina - Painel Administrativo
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/pagina_admin.css">
+{% endblock %}
+
+
+{% block content %}
+
+<section class="card hidden" id="admin-guest">
+
+    <h2>Acesso restrito</h2>
+
+    <p>
+        Você precisa estar logado como administrador
+        para acessar o painel administrativo.
+    </p>
+
+</section>
+
+
+<div class="admin hidden" id="admin-content">
+
+    <h1>Painel Administrativo</h1>
+
+
+    <section>
+
+        <div class="admin-header">
+
+            <input
+                type="text"
+                placeholder="🔍 Buscar conteúdo..."
+                class="search-input"
+            >
+
+            <a href="/admin/topics/new" class="btn-primary">
+                + Novo conteúdo
+            </a>
+
+        </div>
+
+    </section>
+
+
+    <div id="levels-container"></div>
+
+
+</div>
+
+
+{% endblock %}
+
+
+
+{% block extra_js %}
+
+<script>
+
+async function deleteTopic(slug, button){
+
+    const confirmed = confirm(
+        "Tem certeza que deseja excluir este conteúdo? Essa ação não pode ser desfeita."
+    );
+
+    if(!confirmed){
+        return;
+    }
+
+    const response = await fetch(
+        `/admin/topics/${slug}`, {
+            method: "DELETE"
+        }
+    );
+
+    if(response.ok){
+        button.closest(".topic-card").remove();
+    } else {
+        alert("Erro ao excluir conteúdo");
+    }
+
+}
+
+async function loadTopics(){
+
+    const container = document.getElementById("levels-container");
+
+    const res = await fetch("/admin/topics", {
+        credentials: "same-origin"
+    });
+
+    if(!res.ok) return;
+
+
+    const topics = await res.json();
+
+    const grouped = {};
+
+
+    topics.forEach(topic => {
+
+        if(!grouped[topic.level]){
+            grouped[topic.level] = [];
+        }
+
+        grouped[topic.level].push(topic);
+
+    });
+
+
+
+    container.innerHTML = "";
+
+
+    Object.entries(grouped).forEach(([level, topics]) => {
+
+
+        const section = document.createElement("section");
+
+
+        section.innerHTML = `
+
+            <button class="level-button">
+
+                <span>▾</span>
+
+                ${level}
+
+            </button>
+
+
+            <div class="level-content"></div>
+
+        `;
+
+
+
+        const content = section.querySelector(".level-content");
+
+
+
+        topics.forEach(topic => {
+
+
+            const card = document.createElement("div");
+
+            card.className = "topic-card";
+
+
+            card.innerHTML = `
+
+                <div>
+
+                    <h3>${topic.title}</h3>
+
+                    <p>
+                        ${topic.slug}
+                    </p>
+
+                </div>
+
+
+                <div class="topic-actions">
+
+                    <a href="/admin/topics/${topic.slug}/edit">
+                        Editar
+                    </a>
+
+
+                    <button
+                        type="button"
+                        onclick="deleteTopic('${topic.slug}', this)"
+                    >
+                        Excluir
+                    </button>
+
+                </div>
+
+            `;
+
+
+            content.appendChild(card);
+
+
+        });
+
+
+        container.appendChild(section);
+
+
+    });
+
+
+}
+
+
+
+window.addEventListener("auth:change", async (e)=>{
+
+    const user = e.detail.user;
+
+    const guest = document.getElementById("admin-guest");
+    const content = document.getElementById("admin-content");
+
+
+    if(!user){
+
+        guest.classList.remove("hidden");
+        content.classList.add("hidden");
+
+        return;
+
+    }
+
+
+    const res = await fetch("/me", {
+        credentials:"same-origin"
+    });
+
+
+    if(!res.ok){
+
+        guest.classList.remove("hidden");
+        content.classList.add("hidden");
+
+        return;
+
+    }
+
+
+    const data = await res.json();
+
+
+    if(data.is_admin){
+
+        content.classList.remove("hidden");
+        guest.classList.add("hidden");
+
+        loadTopics();
+
+    }else{
+
+        content.classList.add("hidden");
+        guest.classList.remove("hidden");
+
+    }
+
+});
+
+
+</script>
+
+{% endblock %}
