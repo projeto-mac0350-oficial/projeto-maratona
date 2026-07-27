@@ -110,6 +110,8 @@ Editar Conteúdo
 
             </div>
 
+            <div id="references-container">
+
             {% for ref in references %}
 
             <div class="reference-card">
@@ -162,13 +164,25 @@ Editar Conteúdo
                     </div>
 
 
-                    <button
-                        type="button"
-                        class="btn-delete"
-                        onclick="deleteReference('{{ ref.id }}', this)"
-                    >
-                        Remover
-                    </button>
+                    <div class="card-actions">
+
+                        <button
+                            type="button"
+                            class="btn-delete"
+                            onclick="deleteReference('{{ ref.id }}', this)"
+                        >
+                            Remover
+                        </button>
+
+                        <button
+                            type="button"
+                            class="btn-save-inline"
+                            onclick="closeCard(this)"
+                        >
+                            Salvar
+                        </button>
+
+                    </div>
 
 
                 </div>
@@ -176,6 +190,7 @@ Editar Conteúdo
             </div>
 
             {% endfor %}
+            </div>
 
         </section>
 
@@ -347,13 +362,25 @@ Editar Conteúdo
                     </div>
 
 
-                   <button
-                        type="button"
-                        class="btn-delete"
-                        onclick="deleteProblem('{{ problem.id }}', this)"
-                    >
-                        Remover
-                    </button>
+                    <div class="card-actions">
+
+                        <button
+                            type="button"
+                            class="btn-delete"
+                            onclick="deleteProblem('{{ problem.id }}', this)"
+                        >
+                            Remover
+                        </button>
+
+                        <button
+                            type="button"
+                            class="btn-save-inline"
+                            onclick="closeCard(this)"
+                        >
+                            Salvar
+                        </button>
+
+                    </div>
 
 
                 </div>
@@ -420,6 +447,46 @@ function toggleReference(element){
 
 }
 
+// Fecha a aba do card (não envia o formulário) — usado pelo botão "Salvar"
+// dentro de cada referência/problema, tanto novos quanto já existentes.
+function closeCard(button){
+
+    const card = button.closest(".reference-card, .problem-card");
+    const header = card.querySelector(".reference-header, .problem-header");
+    const content = header.nextElementSibling;
+    const arrow = header.querySelector("span");
+
+    content.classList.add("hidden");
+    arrow.textContent = "▶";
+
+}
+
+// Atualiza o título mostrado no cabeçalho do card em tempo real, conforme o
+// campo "Nome" é digitado.
+function bindTitleSync(card, titleInputName, fallbackText){
+
+    const titleInput = card.querySelector(`[name="${titleInputName}"]`);
+    const headerTitle = card.querySelector(".reference-header strong, .problem-header strong");
+
+    if(!titleInput || !headerTitle){
+        return;
+    }
+
+    titleInput.addEventListener("input", () => {
+        headerTitle.textContent = titleInput.value.trim() || fallbackText;
+    });
+
+}
+
+// Liga a sincronização de título nos cards já renderizados pelo servidor.
+document.querySelectorAll(".reference-card").forEach((card) => {
+    bindTitleSync(card, "ref_title", "Nova referência");
+});
+
+document.querySelectorAll(".problem-card").forEach((card) => {
+    bindTitleSync(card, "problem_title", "Novo problema");
+});
+
 function deleteProblem(id, button){
 
     const confirmed = confirm(
@@ -479,8 +546,8 @@ function addProblem(){
 
     card.innerHTML = `
 
-        <div class="problem-header">
-            <span>▶</span>
+        <div class="problem-header" onclick="toggleProblem(this)">
+            <span>▼</span>
             <strong>
                 Novo problema
             </strong>
@@ -554,13 +621,25 @@ function addProblem(){
             </div>
 
 
-            <button
-                type="button"
-                class="btn-delete"
-                onclick="this.closest('.problem-card').remove()"
-            >
-                Remover
-            </button>
+            <div class="card-actions">
+
+                <button
+                    type="button"
+                    class="btn-delete"
+                    onclick="this.closest('.problem-card').remove()"
+                >
+                    Remover
+                </button>
+
+                <button
+                    type="button"
+                    class="btn-save-inline"
+                    onclick="closeCard(this)"
+                >
+                    Salvar
+                </button>
+
+            </div>
 
 
         </div>
@@ -569,13 +648,15 @@ function addProblem(){
 
     container.appendChild(card);
 
+    bindTitleSync(card, "new_problem_title", "Novo problema");
+
 }
 
 function addReference(){
 
-    const section = document.querySelector(
-        ".reference-card"
-    )?.parentElement;
+    const container = document.getElementById(
+        "references-container"
+    );
 
 
     const card = document.createElement("div");
@@ -588,7 +669,7 @@ function addReference(){
         <div class="reference-header"
              onclick="toggleReference(this)">
 
-            <span>▶</span>
+            <span>▼</span>
 
             <strong>
                 Nova referência
@@ -624,13 +705,25 @@ function addReference(){
             </div>
 
 
-            <button
-                type="button"
-                class="btn-delete"
-                onclick="this.closest('.reference-card').remove()"
-            >
-                Remover
-            </button>
+            <div class="card-actions">
+
+                <button
+                    type="button"
+                    class="btn-delete"
+                    onclick="this.closest('.reference-card').remove()"
+                >
+                    Remover
+                </button>
+
+                <button
+                    type="button"
+                    class="btn-save-inline"
+                    onclick="closeCard(this)"
+                >
+                    Salvar
+                </button>
+
+            </div>
 
 
         </div>
@@ -638,7 +731,9 @@ function addReference(){
     `;
 
 
-    section.appendChild(card);
+    container.appendChild(card);
+
+    bindTitleSync(card, "new_ref_title", "Nova referência");
 
 }
 

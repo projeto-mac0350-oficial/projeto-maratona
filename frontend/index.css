@@ -22,6 +22,7 @@
     --field-bg: #f4f4f4;
     --field-border: #d1d5db;
     --border: #e5e7eb;
+    --heatmap-bg: #dddddd;
 
     
     --brand: #E64F2E;
@@ -49,6 +50,7 @@
     --field-bg: #0f172a;
     --field-border: #475569;
     --border: #334155;
+    --heatmap-bg: #0f172a;
 
     --primary: #ef4444;
     --primary-dark: #dc2626;

@@ -1,8 +1,8 @@
 /* ======================
-   Editar Conteúdo
+   Novo Conteúdo
    ====================== */
 
-.admin-edit {
+.admin-new {
 
     max-width: 1000px;
 
@@ -65,7 +65,7 @@
    Seções
    ====================== */
 
-.admin-edit section {
+.admin-new section {
 
     background: var(--card-bg);
 
@@ -82,7 +82,7 @@
 }
 
 
-.admin-edit h2 {
+.admin-new h2 {
 
     color: var(--text);
 
@@ -410,7 +410,7 @@
 @media (max-width: 768px) {
 
 
-    .admin-edit {
+    .admin-new {
 
         padding: 2rem 1rem;
 
