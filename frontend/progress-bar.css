@@ -1,0 +1,48 @@
+/* ======================
+   Barras de progresso (compartilhado entre profile.html e
+   topics-list.html) — lógica em progress-bar.js.
+   ====================== */
+
+.barra-wrap {
+    margin-top: 0.6rem;
+}
+
+.barra-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-bottom: 0.3rem;
+}
+
+.barra-label-text {
+    color: var(--text);
+    font-weight: 600;
+}
+
+.barra-label-link {
+    color: var(--text);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.barra-label-link:hover {
+    color: var(--primary);
+    text-decoration: underline;
+}
+
+.barra-fundo {
+    width: 100%;
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.barra-preenchida {
+    height: 100%;
+    background: var(--primary);
+    border-radius: 999px;
+    transition: width 0.2s ease;
+}

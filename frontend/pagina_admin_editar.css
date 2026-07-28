@@ -251,7 +251,7 @@
 
     border-radius: 8px;
 
-    background: #dc2626;
+    background: var(--primary);
 
     color: white;
 
@@ -266,7 +266,7 @@
 
 .btn-delete:hover {
 
-    background: #b91c1c;
+    background: var(--primary-dark);
 
 }
 

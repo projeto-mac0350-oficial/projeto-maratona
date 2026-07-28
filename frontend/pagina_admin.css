@@ -243,7 +243,7 @@
 
 .topic-actions button {
 
-    background: #dc2626;
+    background: var(--primary);
 
     color: white;
 
@@ -264,7 +264,7 @@
 
 .topic-actions button:hover {
 
-    background: #b91c1c;
+    background: var(--primary-dark);
 
 }
 

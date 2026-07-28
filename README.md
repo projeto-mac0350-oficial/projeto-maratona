@@ -17,8 +17,8 @@ projeto-maratona/
 │   ├── base.html           # layout compartilhado (header, nav, footer, tema); páginas de conteúdo o estendem via Jinja
 │   ├── topic.html          # página de conteúdo genérica, estende base.html (renderiza GET /topics/<slug>)
 │   ├── topic.css           # estilos específicos de topic.html
-│   ├── topics_list.html    # listagem em cartões: níveis (sem ?level=) ou tópicos de um nível (?level=<slug>)
-│   ├── topics_list.css
+│   ├── topics-list.html    # listagem em cartões: níveis (sem ?level=) ou tópicos de um nível (?level=<slug>)
+│   ├── topics-list.css
 │   ├── busca_binaria.html  # redireciona p/ /conteudo?topic=busca_binaria (compatibilidade)
 │   ├── solucao.html        # página de solução de um problema
 │   ├── painel.html         # dashboard: progresso do usuário logado
@@ -56,7 +56,7 @@ start e é ignorado pelo Git. Defina `SECRET_KEY` no ambiente para produção.
 | ------ | ------------ | ----------------------------------------------------- |
 | GET    | `/`          | Homepage (`index.html`)                               |
 | GET    | `/conteudo`  | Página de um tópico (`topic.html`); slug lido de `?topic=<slug>` no client |
-| GET    | `/conteudos` | Listagem em cartões (`topics_list.html`): níveis, ou tópicos de um nível via `?level=<slug>` |
+| GET    | `/conteudos` | Listagem em cartões (`topics-list.html`): níveis, ou tópicos de um nível via `?level=<slug>` |
 | GET    | `/health`    | Liveness — `{"status": "ok"}`                         |
 | POST   | `/register`  | `{username, password}` → cria usuário; `409` se já existe, `400` se faltar campo |
 | POST   | `/login`     | `{username, password}` → inicia a sessão; `401` se inválido |

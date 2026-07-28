@@ -5,7 +5,8 @@ MaratonUSP Ensina - Conteúdos
 {% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="topics_list.css">
+<link rel="stylesheet" href="topics-list.css">
+<link rel="stylesheet" href="progress-bar.css">
 {% endblock %}
 
 {% block content %}
@@ -20,13 +21,16 @@ MaratonUSP Ensina - Conteúdos
 {% endblock %}
 
 {% block extra_js %}
+<script src="./progress-bar.js"></script>
 <script>
 /*
  * Two modes, chosen by the ?level=<slug> query param:
  *  - no level: shows a chooser card per level (from GET /levels), each
  *    linking to /conteudos?level=<slug>.
  *  - level given: fetches GET /levels/<slug> (level + its topics) and
- *    renders one card per topic, linking to /conteudo?topic=<slug>.
+ *    renders one card per topic, linking to /conteudo?topic=<slug>, each
+ *    with a "problemas feitos / total" bar right under the title (via the
+ *    shared progress-bar.js, same module the profile page uses).
  */
 (async () => {
     const titleEl = document.getElementById("topics-list-title");
@@ -66,13 +70,29 @@ MaratonUSP Ensina - Conteúdos
         });
     }
 
-    function renderTopicCards(topics) {
+    async function renderTopicCards(topics) {
         if (!topics.length) {
             fail("Nenhum conteúdo disponível ainda neste nível.");
             return;
         }
         status.remove();
-        topics.forEach((topic) => {
+
+        // Sem login isso dá 401 e cai no catch — as barras simplesmente não
+        // aparecem, os cards continuam normais (mesmo comportamento que os
+        // toggles "Lido"/"AC" têm hoje em topic.html sem sessão).
+        let progress = {};
+        try {
+            const res = await fetch("/progress", { credentials: "same-origin" });
+            if (res.ok) progress = await res.json();
+        } catch (err) {
+            /* mantém vazio */
+        }
+
+        const totais = await Promise.all(
+            topics.map((topic) => window.ProgressBar.totalProblemas(topic.slug))
+        );
+
+        topics.forEach((topic, i) => {
             const card = document.createElement("a");
             card.className = "topic-card";
             card.href = `/conteudo?topic=${encodeURIComponent(topic.slug)}`;
@@ -89,11 +109,22 @@ MaratonUSP Ensina - Conteúdos
                 card.appendChild(summary);
             }
 
+            const total = totais[i];
+            if (total > 0) {
+                const ac = window.ProgressBar.contarFeitos(progress, topic.slug);
+                card.appendChild(window.ProgressBar.criarBarra(ac, total));
+            }
+
             grid.appendChild(card);
         });
     }
 
     const levelSlug = new URLSearchParams(location.search).get("level");
+    if (!levelSlug) {
+        titleEl.textContent = "Conteúdos";
+        await renderLevelChooser();
+        return;
+    }
 
     let level;
     try {
@@ -113,7 +144,7 @@ MaratonUSP Ensina - Conteúdos
 
     document.title = `${level.title} — Conteúdos — MaratonUSP Ensina`;
     titleEl.textContent = `${level.title}`;
-    renderTopicCards(level.topics);
+    await renderTopicCards(level.topics);
 })();
 </script>
 {% endblock %}

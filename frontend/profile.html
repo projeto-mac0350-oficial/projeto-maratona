@@ -1,0 +1,346 @@
+{% extends "base.html" %}
+
+{% block title %}
+MaratonUSP Ensina - Meu painel
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="profile.css">
+<link rel="stylesheet" href="heatmap.css">
+<link rel="stylesheet" href="calendar.css">
+<link rel="stylesheet" href="goals.css">
+<link rel="stylesheet" href="progress-bar.css">
+{% endblock %}
+
+{% block content %}
+
+<!-- VISITANTE (sem sessão) -->
+<section class="card hidden" id="guest-card">
+    <h2 class="section-heading">Meu painel</h2>
+    <p>Use o botão <strong>Entrar</strong> no topo para acessar a sua conta
+        e acompanhar o seu progresso de estudos.</p>
+</section>
+
+<!-- LOGADO -->
+
+<div class="hidden" id="painel-content">
+    <div class="perfil">
+
+    <h1>Olá, <span id="account-username"></span>!</h1>
+   
+    <section>
+        <h2>Sua atividade</h2>
+        <div id="heatmap" class="heatmap" aria-label="Heatmap de atividade"></div>
+
+    </section>
+
+    <section>
+        <h2>Sua streak</h2>
+        <!-- Mês atual com os dias logados marcados; preenchido por calendar.js -->
+        <div id="mini-calendar" class="mini-calendar" aria-label="Calendário de atividade"></div>
+    </section>
+
+    <section>
+        <h2>Progresso</h2>
+        <div id="progresso-niveis"></div>
+    </section>
+
+     <section>
+        <h2 class="section-heading">Últimos Problemas resolvidos</h2>
+        <ul class="painel-list" id="list-problems"></ul>
+    </section>
+
+    <section>
+        <h2 class="section-heading">Últimas Referências lidas</h2>
+        <ul class="painel-list" id="list-refs"></ul>
+    </section>
+
+    <section>
+        <h2>Suas metas</h2>
+
+        <ul class="metas-list" id="metas-list"></ul>
+
+        <form class="meta-form hidden" id="meta-form">
+            <label class="meta-form-field">
+                Descrição
+                <input type="text" id="meta-descricao" maxlength="100" required
+                       placeholder="Ex.: Resolver 5 problemas de grafos">
+            </label>
+
+            <label class="meta-form-field meta-form-field-date">
+                Prazo (opcional)
+                <span class="meta-form-date">
+                    <input type="number" id="meta-dia" min="1" max="31" placeholder="Dia">
+                    <input type="number" id="meta-mes" min="1" max="12" placeholder="Mês">
+                </span>
+            </label>
+
+            <p class="meta-form-error hidden" id="meta-form-error"></p>
+
+            <div class="meta-form-actions">
+                <button type="submit" class="btn-link">Salvar</button>
+                <button type="button" class="btn-link btn-secondary" id="meta-cancelar">Cancelar</button>
+            </div>
+        </form>
+
+        <button type="button" id="btn-definir-meta">Definir meta</button>
+    </section>
+
+    </div>
+
+</div>
+
+{% endblock %}
+{% block extra_js %}
+
+<script src="./calendar.js"></script>
+<script src="./heatmap.js"></script>
+<script src="./goals.js"></script>
+<script src="./progress-bar.js"></script>
+
+<script>
+/* --- Render das listas de progresso -------------------------------------- */
+const MAX_LIST_ITEMS = 10;
+ 
+// item_key segue "<topic_slug>:<kind_curto>:<item_slug>" (ver _serialize_item
+// no app.py) — o primeiro pedaço já é o slug do tópico que /conteudo espera.
+function topicSlugFromItemKey(itemKey) {
+    return itemKey.split(":")[0];
+}
+ 
+function fillList(ul, items, emptyText) {
+    ul.innerHTML = "";
+    if (!items.length) {
+        const li = document.createElement("li");
+        li.className = "painel-empty";
+        li.textContent = emptyText;
+        ul.appendChild(li);
+        return;
+    }
+    items.forEach((item) => {
+        const li = document.createElement("li");
+        const link = document.createElement("a");
+        link.className = "painel-item-link";
+        link.href = `/conteudo?topic=${encodeURIComponent(item.topicSlug)}`;
+        link.textContent = item.label;
+        li.appendChild(link);
+        ul.appendChild(li);
+    });
+}
+ 
+function render(progress) {
+    // Object.entries (não Object.values) porque precisamos do item_key pra
+    // saber a qual tópico cada item pertence.
+    const done = Object.entries(progress)
+        .filter(([, p]) => p.done)
+        .map(([itemKey, p]) => ({
+            label: p.label || "(sem nome)",
+            kind: p.kind,
+            topicSlug: topicSlugFromItemKey(itemKey),
+            updatedAt: p.updated_at || "",
+        }))
+        .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+ 
+    const problems = done.filter((p) => p.kind === "problem").slice(0, MAX_LIST_ITEMS);
+    const refs = done.filter((p) => p.kind === "ref").slice(0, MAX_LIST_ITEMS);
+ 
+    fillList(document.getElementById("list-problems"), problems, "Nenhum problema resolvido ainda.");
+    fillList(document.getElementById("list-refs"), refs, "Nenhuma referência lida ainda.");
+ 
+    document.getElementById("painel-summary").textContent =
+        `${problems.length} problema(s) resolvido(s) · ${refs.length} referência(s) lida(s)`;
+}
+
+
+/*--- Barras de progresso -------------------------------------------------- */
+
+// Níveis carregados de GET /levels (era uma lista fixa NIVEIS_slugs/labels;
+// agora reflete o que estiver no banco, na ordem de "position").
+let niveisCarregados = [];
+const expandido = {};
+let mapaTituloAtual = {};
+let niveisAtuais = [];
+let agrupadoAtual = {};
+
+async function carregarNiveis() {
+    if (niveisCarregados.length) return niveisCarregados;
+    try {
+        const res = await fetch("/levels", { credentials: "same-origin" });
+        if (res.ok) niveisCarregados = await res.json();
+    } catch (err) {
+        niveisCarregados = [];
+    }
+    niveisCarregados.forEach((nivel) => {
+        if (!(nivel.slug in expandido)) expandido[nivel.slug] = false;
+    });
+    return niveisCarregados;
+}
+
+// mapaNivel: topicSlug -> levelSlug. mapaTitulo: topicSlug -> título do tópico.
+// mapaTotal: topicSlug -> número real de problemas do tópico — vem do próprio
+// conteúdo (/topics/<slug>), não do /progress, que só lista os itens que o
+// usuário já clicou pelo menos uma vez (por isso a barra sempre batia 100%:
+// o "total" antigo contava só os itens tocados, nunca os que faltam tocar).
+async function montarMapaTopicoNivel(niveis) {
+    const mapaNivel = {};
+    const mapaTitulo = {};
+    const mapaTotal = {};
+    try {
+        const porNivel = await Promise.all(
+            niveis.map((nivel) =>
+                fetch(`/levels/${nivel.slug}`, { credentials: "same-origin" }).then((r) => r.json())
+            )
+        );
+
+        const slugsDosTopicos = [];
+        porNivel.forEach((nivel) => {
+            (nivel.topics || []).forEach((topico) => {
+                mapaNivel[topico.slug] = nivel.slug;
+                mapaTitulo[topico.slug] = topico.title;
+                slugsDosTopicos.push(topico.slug);
+            });
+        });
+
+        const detalhes = await Promise.all(
+            slugsDosTopicos.map((slug) => window.ProgressBar.totalProblemas(slug))
+        );
+        slugsDosTopicos.forEach((slug, i) => {
+            mapaTotal[slug] = detalhes[i];
+        });
+    } catch (err) {}
+    return { mapaNivel, mapaTitulo, mapaTotal };
+}
+
+function agruparPorNivelTopico(progress, mapaTopicoNivel, mapaTotal, niveis) {
+    const out = {};
+    niveis.forEach((nivel) => (out[nivel.slug] = {}));
+
+    // Uma entrada por tópico existente, com o total real de problemas —
+    // mesmo que o usuário ainda não tenha clicado em nada nele. "ac" vem de
+    // ProgressBar.contarFeitos (mesma lógica usada no topics-list.html), pra
+    // não duplicar a regra de "o que conta como feito" em dois lugares.
+    Object.entries(mapaTopicoNivel).forEach(([topico, nivel]) => {
+        if (!out[nivel]) return;
+        out[nivel][topico] = {
+            ac: window.ProgressBar.contarFeitos(progress, topico),
+            total: mapaTotal[topico] || 0,
+        };
+    });
+
+    return out;
+}
+
+function totalNivel(topicos){
+    let ac = 0, total = 0;
+    for (const t of Object.values(topicos)) {
+        ac += t.ac;
+        total += t.total;
+    }
+    return { ac, total };
+}
+
+
+function renderNiveis(agrupado, mapaTitulo, niveis){
+    const container = document.getElementById("progresso-niveis");
+    container.innerHTML = "";
+
+    niveis.forEach((nivel) => {
+        const topicos = agrupado[nivel.slug] || {};
+        const { ac, total } = totalNivel(topicos);
+
+        const linha = document.createElement("div");
+        linha.className = "nivel-linha";
+
+        const titulo = document.createElement("span");
+        titulo.className = "nivel-titulo";
+        titulo.textContent = nivel.title;
+        linha.appendChild(titulo);
+
+        linha.appendChild(window.ProgressBar.criarBarra(ac, total));
+
+        const seta = document.createElement("button");
+        seta.className = "nivel-seta";
+        seta.setAttribute("aria-label", expandido[nivel.slug] ? "Recolher tópicos" : "Expandir tópicos");
+        seta.textContent = "▾";
+        seta.style.transform = expandido[nivel.slug] ? "rotate(180deg)" : "rotate(0deg)";
+        seta.addEventListener("click", () => {
+            expandido[nivel.slug] = !expandido[nivel.slug];
+            renderNiveis(agrupadoAtual, mapaTituloAtual, niveisAtuais); // redesenha com o novo estado de aberto/fechado
+        });
+        linha.appendChild(seta);
+
+        container.appendChild(linha);
+
+        if (expandido[nivel.slug]) {
+            const detalhe = document.createElement("div");
+            detalhe.className = "nivel-detalhe";
+
+            const entradas = Object.entries(topicos);
+            if (!entradas.length) {
+                detalhe.innerHTML = '<p class="nivel-vazio">Nenhum tópico ainda neste nível.</p>';
+            } else {
+               entradas.forEach(([topico, { ac, total }]) => {
+                    const linhaTopico = document.createElement("div");
+                    linhaTopico.className = "topico-linha";
+                    const nomeExibido = mapaTitulo[topico] || topico; // fallback pro slug se não achar título
+                    const hrefTopico = `/conteudo?topic=${encodeURIComponent(topico)}`;
+                    linhaTopico.appendChild(window.ProgressBar.criarBarra(ac, total, nomeExibido, hrefTopico));
+                    detalhe.appendChild(linhaTopico);
+                });
+            }
+            container.appendChild(detalhe);
+        }
+    });
+}
+
+async function loadProgressoNiveis() {
+    let progress = {};
+    try {
+        const res = await fetch("/progress", { credentials: "same-origin" });
+        if (res.ok) progress = await res.json();
+    } catch (err) {}
+
+    const niveis = await carregarNiveis();
+    const { mapaNivel, mapaTitulo, mapaTotal } = await montarMapaTopicoNivel(niveis);
+    mapaTituloAtual = mapaTitulo;
+    niveisAtuais = niveis;
+    agrupadoAtual = agruparPorNivelTopico(progress, mapaNivel, mapaTotal, niveis);
+    renderNiveis(agrupadoAtual, mapaTitulo, niveis);
+}
+
+/* --- Sessão (via auth-widget) + progresso -------------------------------- */
+async function loadProgress() {
+    let progress = {};
+    try {
+        const res = await fetch("/progress", { credentials: "same-origin" });
+        if (res.ok) progress = await res.json();
+    } catch (err) {
+        /* mantém vazio */
+    }
+    render(progress);
+}
+
+// O auth-widget verifica a sessão (GET /me) e dispara "auth:change" no load e
+// sempre que o usuário entra/sai — então o painel reage sem chamar /me.
+window.addEventListener("auth:change", (e) => {
+    const user = e.detail.user;
+    const guest = document.getElementById("guest-card");
+    const content = document.getElementById("painel-content");
+    if (user) {
+        document.getElementById("account-username").textContent = user.username;
+        guest.classList.add("hidden");
+        content.classList.remove("hidden");
+        loadProgress();
+        loadGoals();
+        loadProgressoNiveis();
+    } else {
+        content.classList.add("hidden");
+        guest.classList.remove("hidden");
+        resetMetaForm();
+        metaForm.classList.add("hidden");
+        btnDefinirMeta.classList.remove("hidden");
+    }
+});
+</script>
+
+{% endblock %}
