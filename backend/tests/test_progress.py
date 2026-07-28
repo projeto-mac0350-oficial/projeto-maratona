@@ -1,6 +1,7 @@
 """Tests for the per-user study-progress endpoints."""
 
 import app
+from datetime import datetime
 
 ITEM = {
     "item_key": "busca_binaria:prob:roadworks",
@@ -39,13 +40,14 @@ def test_post_progress_saves_and_is_returned(auth_client):
     assert res.get_json() == {"item_key": ITEM["item_key"], "done": True}
 
     saved = auth_client.get("/progress").get_json()
-    assert saved == {
-        ITEM["item_key"]: {
-            "done": True,
-            "kind": "problem",
-            "label": "Problema 1 - Roadworks",
-        }
-    }
+    item = saved[ITEM["item_key"]]
+    
+    assert item["done"] is True
+    assert item["kind"] == "problem"
+    assert item["label"] == "Problema 1 - Roadworks"
+
+    # Verify the timestamp is present and correctly formatted.
+    datetime.strptime(item["updated_at"], "%Y-%m-%d %H:%M:%S")
 
 
 def test_post_progress_requires_item_key_and_kind(auth_client):

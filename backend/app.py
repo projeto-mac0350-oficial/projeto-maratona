@@ -579,7 +579,7 @@ def get_progress():
     """Return the current user's progress as a map keyed by item_key."""
     with closing(get_db()) as db:
         rows = db.execute(
-            "SELECT item_key, kind, label, done FROM progress WHERE user_id = ?",
+            "SELECT item_key, kind, label, done, updated_at FROM progress WHERE user_id = ?",
             (session["user_id"],),
         ).fetchall()
     return jsonify(
@@ -588,6 +588,7 @@ def get_progress():
                 "done": bool(row["done"]),
                 "kind": row["kind"],
                 "label": row["label"],
+                "updated_at": row["updated_at"],
             }
             for row in rows
         }
@@ -819,7 +820,7 @@ def conteudo():
 @app.get("/conteudos")
 def conteudos():
     """Serve the topics list page (cards linking to /conteudo?topic=<slug>)."""
-    return render_template("topics_list.html")
+    return render_template("topics-list.html")
 
 
 # ---- Perfil ------------------------------------------------------------
@@ -839,7 +840,7 @@ def perfil():
         ).fetchone()
 
     return render_template(
-        "pagina_logado.html",
+        "profile.html",
         is_admin=bool(admin["is_admin"])
     )
 
