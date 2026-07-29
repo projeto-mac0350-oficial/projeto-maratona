@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Maratonusp Ensina{% endblock %}</title>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="/base.css">
     <link rel="stylesheet" href="/index.css">
@@ -31,19 +34,23 @@
 
     <nav class="barra-navegacao">
         <div class="head_botoes">
-            <!-- Login/logout control injected by auth-widget.js -->
-            <span id="auth-controls"></span>
-            <a href="/" class="nav-button">Início</a>
+        
             <div class="nav-dropdown" id="niveis-dropdown">
                 <button type="button" class="nav-button" id="niveis-toggle"
                         aria-haspopup="true" aria-expanded="false">
-                    Níveis ▾
+                    Níveis ▾ 
                 </button>
                 <div class="nav-dropdown-menu" id="niveis-menu" hidden></div>
             </div>
             <a href="/perfil" id="btn-logado" class="nav-button hidden">Perfil</a>
             <a href="/admin" id="btn-admin" class="nav-button hidden">Admin</a>
-            <button id="theme-toggle" type="button">🌙 Escuro</button>
+
+            <!-- Login/logout control injected by auth-widget.js -->
+            <div id="container-auth-controls"><span id="auth-controls"></span></div>
+            
+            <button id="theme-toggle" class="nav-button" type="button">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#0f172a"><path d="M480-28 346-160H160v-186L28-480l132-134v-186h186l134-132 134 132h186v186l132 134-132 134v186H614L480-28Zm0-252q83 0 141.5-58.5T680-480q0-83-58.5-141.5T480-680v400Zm0 140 100-100h140v-140l100-100-100-100v-140H580L480-820 380-720H240v140L140-480l100 100v140h140l100 100Zm0-340Z"/></svg>
+            </button>
         </div>
     </nav>
 </header>
@@ -64,7 +71,9 @@ const themeToggle = document.getElementById("theme-toggle");
 
 function refreshThemeLabel() {
     const dark = root.getAttribute("data-theme") === "dark";
-    themeToggle.textContent = dark ? "☀️ Claro" : "🌙 Escuro";
+    const lightIcon = '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#0f172a"><path d="M480-28 346-160H160v-186L28-480l132-134v-186h186l134-132 134 132h186v186l132 134-132 134v186H614L480-28Zm0-252q83 0 141.5-58.5T680-480q0-83-58.5-141.5T480-680v400Zm0 140 100-100h140v-140l100-100-100-100v-140H580L480-820 380-720H240v140L140-480l100 100v140h140l100 100Zm0-340Z"/></svg>';
+    const darkIcon = '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#FFFFFF"><path d="M480-28 346-160H160v-186L28-480l132-134v-186h186l134-132 134 132h186v186l132 134-132 134v186H614L480-28Zm0-252q83 0 141.5-58.5T680-480q0-83-58.5-141.5T480-680v400Zm0 140 100-100h140v-140l100-100-100-100v-140H580L480-820 380-720H240v140L140-480l100 100v140h140l100 100Zm0-340Z"/></svg>';
+    themeToggle.innerHTML = dark ? darkIcon : lightIcon;
 }
 
 themeToggle.addEventListener("click", () => {

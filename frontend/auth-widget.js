@@ -73,9 +73,9 @@
     `;
 
     const CONTROLS_HTML = `
-        <button id="signin-btn" type="button">Entrar</button>
+        <button id="signin-btn" class="nav-button" type="button">Entrar</button>
         <span id="user-greeting" class="user-greeting auth-hidden">Olá, <strong id="header-username"></strong></span>
-        <button id="logout-btn" class="auth-hidden" type="button">Sair</button>
+        <button id="logout-btn" class="auth-hidden nav-button" type="button">Sair</button>
     `;
 
     function init() {
