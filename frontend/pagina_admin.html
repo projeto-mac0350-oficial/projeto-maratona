@@ -132,7 +132,6 @@ async function loadTopics(){
 
             </button>
 
-
             <div class="level-content"></div>
 
         `;
@@ -140,16 +139,27 @@ async function loadTopics(){
 
 
         const content = section.querySelector(".level-content");
+        const button = section.querySelector(".level-button");
+        const arrow = button.querySelector("span");
 
+        button.addEventListener("click", () => {
+
+            content.classList.toggle("hidden");
+
+            if(content.classList.contains("hidden")){
+                arrow.textContent = "▸";
+            } else {
+                arrow.textContent = "▾";
+            }
+
+        });
 
 
         topics.forEach(topic => {
 
 
             const card = document.createElement("div");
-
             card.className = "topic-card";
-
 
             card.innerHTML = `
 
@@ -182,7 +192,6 @@ async function loadTopics(){
 
             `;
 
-
             content.appendChild(card);
 
 
@@ -196,6 +205,8 @@ async function loadTopics(){
 
 
 }
+
+
 
 
 

@@ -158,6 +158,10 @@
 
 }
 
+.level-content.hidden {
+    display: none;
+}
+
 
 /* ======================
    Cards de conteúdo
