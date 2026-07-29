@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Maratonusp Ensina{% endblock %}</title>
 
+
     <link rel="stylesheet" href="/base.css">
     <link rel="stylesheet" href="/index.css">
     <link rel="stylesheet" href="/auth-widget.css">
+    <link rel="stylesheet" href="/logout-message.css">
     {% block extra_css %}{% endblock %}
 
 
@@ -120,6 +122,7 @@ document.addEventListener("click", (e) => {
 </script>
 
 <script src="/auth-widget.js"></script>
+<script src="/logout-message.js"></script>
 
 {% block extra_js %}{% endblock %}
 

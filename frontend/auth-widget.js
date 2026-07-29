@@ -242,6 +242,7 @@
                 /* ignore: clear the UI regardless */
             }
             setLoggedOut();
+            window.location.replace("/?logout=1");
         });
 
         // --- Reflect the existing session on load ----------------------------
