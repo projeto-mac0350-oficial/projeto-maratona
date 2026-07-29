@@ -33,3 +33,23 @@ def auth_client(client):
     client.post("/register", json={"username": "alice", "password": "secret"})
     client.post("/login", json={"username": "alice", "password": "secret"})
     return client
+
+@pytest.fixture()
+def admin_client(client):
+    client.post("/register", json={
+        "username": "admin",
+        "password": "admin_password"
+    })
+
+    with flask_app.get_db() as db:
+        db.execute(
+            "UPDATE users SET is_admin = 1 WHERE username = ?",
+            ("admin",)
+        )
+
+    client.post("/login", json={
+        "username": "admin",
+        "password": "admin_password"
+    })
+
+    return client
