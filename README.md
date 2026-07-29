@@ -19,7 +19,6 @@ projeto-maratona/
 │   ├── topic.css           # estilos específicos de topic.html
 │   ├── topics-list.html    # listagem em cartões: níveis (sem ?level=) ou tópicos de um nível (?level=<slug>)
 │   ├── topics-list.css
-│   ├── busca_binaria.html  # redireciona p/ /conteudo?topic=busca_binaria (compatibilidade)
 │   ├── solucao.html        # página de solução de um problema
 │   ├── painel.html         # dashboard: progresso do usuário logado
 │   ├── progress.js         # persiste os toggles "lido/resolvido" por usuário
