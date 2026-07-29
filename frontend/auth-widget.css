@@ -6,17 +6,18 @@
    content page, which isn't themed) — so the modal looks right everywhere.
    =========================================================================== */
 
-/* Header controls live in base.css's .head_botoes; keep them on one row. */
-.head_botoes {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
+
 
 .user-greeting {
     color: var(--text);
     font-size: 0.9rem;
     white-space: nowrap;
+    padding: 0 1.2rem;
+}
+
+#container-auth-controls {
+    padding-left: 1rem;
+    border-left: 2px solid var(--border);;
 }
 
 /* Shared utility (the content page's CSS doesn't define it). */
@@ -96,8 +97,8 @@
 }
 
 .auth-tab.active {
-    color: var(--brand, #e64f2e);
-    border-bottom-color: var(--brand, #e64f2e);
+    color: var(--primary);
+    border-bottom-color: var(--primary);
 }
 
 /* --- Forms ---------------------------------------------------------------- */
@@ -136,7 +137,7 @@
 }
 
 .auth-form .btn-primary {
-    background: var(--brand, #e64f2e);
+    background: var(--primary);
     color: #fff;
     border: none;
     border-radius: 10px;
@@ -148,7 +149,7 @@
 }
 
 .auth-form .btn-primary:hover {
-    background: var(--brand-hover, #ffb7d5);
+    background: var(--primary-dark);
 }
 
 .auth-form .btn-primary:disabled {
@@ -164,7 +165,7 @@
 }
 
 .auth-form .form-msg.error {
-    color: var(--danger, #e74c3c);
+    color: var(--danger, --primary);
 }
 
 .auth-form .form-msg.success {

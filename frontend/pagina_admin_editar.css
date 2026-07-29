@@ -3,13 +3,9 @@
    ====================== */
 
 .admin-edit {
-
     max-width: 1000px;
-
     margin: 0 40px;
-
     padding: 3rem 2rem 5rem;
-
 }
 
 
@@ -20,22 +16,16 @@
 .page-header {
 
     display: flex;
-
     align-items: center;
-
     gap: 1rem;
-
     margin-bottom: 2rem;
-
 }
 
 
 .page-header h1 {
 
     color: var(--primary);
-
     font-size: 3rem;
-
     margin: 0;
 
 }
@@ -44,20 +34,14 @@
 .back-button {
 
     color: var(--primary);
-
     text-decoration: none;
-
     font-weight: 600;
-
     transition: .2s;
-
 }
 
 
 .back-button:hover {
-
     transform: translateX(-3px);
-
 }
 
 
@@ -68,15 +52,10 @@
 .admin-edit section {
 
     background: var(--card-bg);
-
     border: 1px solid var(--border);
-
     border-radius: 16px;
-
     padding: 1.5rem;
-
     margin-bottom: 1.5rem;
-
     box-shadow: var(--shadow);
 
 }
@@ -85,9 +64,7 @@
 .admin-edit h2 {
 
     color: var(--text);
-
     font-size: 1.4rem;
-
     margin-bottom: 1rem;
 
 }
@@ -100,11 +77,8 @@
 .field {
 
     display: flex;
-
     flex-direction: column;
-
     gap: .4rem;
-
     margin-bottom: 1rem;
 
 }
@@ -113,9 +87,7 @@
 .field label {
 
     color: var(--text);
-
     font-size: .95rem;
-
     font-weight: 600;
 
 }
@@ -411,25 +383,19 @@
 
 
     .admin-edit {
-
         padding: 2rem 1rem;
-
     }
 
 
     .page-header h1 {
-
         font-size: 2.2rem;
-
     }
 
 
     .section-title {
 
         flex-direction: column;
-
         align-items: flex-start;
-
         gap: .8rem;
 
     }

@@ -14,13 +14,6 @@ MaratonUSP Ensina - Meu painel
 
 {% block content %}
 
-<!-- VISITANTE (sem sessão) -->
-<section class="card hidden" id="guest-card">
-    <h2 class="section-heading">Meu painel</h2>
-    <p>Use o botão <strong>Entrar</strong> no topo para acessar a sua conta
-        e acompanhar o seu progresso de estudos.</p>
-</section>
-
 <!-- LOGADO -->
 
 <div class="hidden" id="painel-content">
@@ -324,18 +317,15 @@ async function loadProgress() {
 // sempre que o usuário entra/sai — então o painel reage sem chamar /me.
 window.addEventListener("auth:change", (e) => {
     const user = e.detail.user;
-    const guest = document.getElementById("guest-card");
     const content = document.getElementById("painel-content");
     if (user) {
         document.getElementById("account-username").textContent = user.username;
-        guest.classList.add("hidden");
         content.classList.remove("hidden");
         loadProgress();
         loadGoals();
         loadProgressoNiveis();
     } else {
         content.classList.add("hidden");
-        guest.classList.remove("hidden");
         resetMetaForm();
         metaForm.classList.add("hidden");
         btnDefinirMeta.classList.remove("hidden");

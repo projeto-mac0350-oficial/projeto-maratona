@@ -1,3 +1,52 @@
+:root {
+    --bg: #fafafa;
+    --card-bg: #ffffff;
+    --text: #1f2937;
+    --text-strong: #111827;
+    --muted: #6b7280;
+    --field-bg: #f4f4f4;
+    --field-border: #d1d5db;
+    --border: #e5e7eb;
+    --heatmap-bg: #dddddd;
+
+    
+    --brand: #E64F2E;
+    --brand-hover: #FFB7D5;
+
+    
+    --primary: #dc2626;
+    --primary-dark: #b91c1c;
+    --primary-light: #fef2f2;
+
+    --danger: #e74c3c;
+    --success: #2ecc71;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+
+    --progress-bg: #e5e7eb;       
+    --progress-fill: #dc2626; 
+}
+
+[data-theme="dark"] {
+    --bg: #0f172a;
+    --card-bg: #1e293b;
+    --text: #e2e8f0;
+    --text-strong: #f8fafc;
+    --muted: #94a3b8;
+    --field-bg: #0f172a;
+    --field-border: #475569;
+    --border: #334155;
+    --heatmap-bg: #0f172a;
+
+    --primary: #ef4444;
+    --primary-dark: #dc2626;
+    --primary-light: rgba(239, 68, 68, 0.14);
+
+    --shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+
+    --progress-bg: #334155;
+    --progress-fill: #ef4444;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -13,7 +62,11 @@ body {
     flex-direction: column;
     min-height: 100vh;
     font-family: 'Roboto', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    transition: background 0.3s, color 0.3s;
 }
+
 
 main {
     flex: 1;
@@ -22,20 +75,67 @@ main {
     width: 100%;
 }
 
-header h1 {
-    margin: 0;
-    font-size: 1.7rem;
+
+
+/* --- Header ----------------------------- */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 3rem;
+    background-color: var(--card-bg);
+    border-bottom: 1px solid var(--border);
+    transition: background 0.3s, border-color 0.3s;
 }
 
-header a {
+
+header h1 a {
     margin: 0;
+    font-family: 'Rubik', sans-serif;
     font-size: 1.7rem;
+    font-weight: 700;
     text-decoration: none;
-    color: inherit;
+    color: var(--primary);
+    transition: 0.3s;
 }
 
-#conteudo {
-    width: 100%;
+.barra-navegacao {
+    display: flex;
+    align-items: center;
+}
+
+.head_botoes {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.head_botoes .nav-button {
+    display: inline-block;
+    padding: 0.7rem 1.2rem;
+    border: none;
+    border-radius: 8px;
+    text-decoration: none;
+    background: transparent;
+    color: var(--text);
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.head_botoes .nav-button:hover,
+#auth-controls button:hover {
+    background-color: var(--primary-light);
+    color: var(--primary);
+}
+
+/* Botão de tema, dentro do header (segue o mesmo padrão dos botões da nav) */
+#theme-toggle {
+    padding: 0 0.7rem;
+}
+#theme-toggle:hover {
+    background: none;
 }
 
 .nav-dropdown {
@@ -77,3 +177,16 @@ header a {
     color: var(--text-light);
     font-size: 0.9rem;
 }
+
+/* --- Footer ----------------------------------------------------------------- */
+.site-footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+    padding: 18px;
+}
+
+.hidden {
+    display: none !important;
+}
+
