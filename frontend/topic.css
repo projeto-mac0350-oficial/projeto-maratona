@@ -108,9 +108,21 @@
     flex-shrink: 0;
 }
 
-.green { background: #2ecc71; }
-.yellow { background: #f1c40f; }
-.red { background: #e74c3c; }
+.green { background: var(--success); }
+.yellow { background: var(--difficulty-medium); }
+.red { background: var(--primary); }
+
+.dot-easy {
+    background: var(--success);
+}
+
+.dot-medium {
+    background: var(--difficulty-medium);
+}
+
+.dot-hard {
+    background: var(--primary);
+}
 
 /* AC BUTTON (NA ⇄ AC) */
 .ac-btn {

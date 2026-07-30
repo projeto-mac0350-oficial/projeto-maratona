@@ -97,6 +97,8 @@
         const logoutBtn = mount.querySelector("#logout-btn");
         const btnPerfil = document.getElementById("btn-logado");
         const btnAdmin = document.getElementById("btn-admin");
+        const btnComecar = document.getElementById("btn-comecar");
+        const btnComecarLogged = document.getElementById("btn-comecar-logged");
       
         const forms = {
             login: dialog.querySelector("#login-form"),
@@ -116,6 +118,14 @@
             signinBtn.classList.add("auth-hidden");
             greeting.classList.remove("auth-hidden");
             logoutBtn.classList.remove("auth-hidden");
+
+            if (btnComecar) {
+                btnComecar.classList.add("hidden");
+            }
+
+            if (btnComecarLogged) {
+                btnComecarLogged.classList.remove("hidden");
+            }
 
             if (btnPerfil) {
                 btnPerfil.classList.remove("hidden");
@@ -142,6 +152,14 @@
             greeting.classList.add("auth-hidden");
             logoutBtn.classList.add("auth-hidden");
 
+            if (btnComecar) {
+                btnComecar.classList.remove("hidden");
+            }
+
+            if (btnComecarLogged) {
+                btnComecarLogged.classList.add("hidden");
+            }
+
             if (btnPerfil) {
                 btnPerfil.classList.add("hidden");
             }
@@ -153,6 +171,12 @@
             if (typeof dialog.showModal === "function") dialog.showModal();
             else dialog.setAttribute("open", "");
         });
+        if (btnComecar) {
+            btnComecar.addEventListener("click", () => {
+                if (typeof dialog.showModal === "function") dialog.showModal();
+                else dialog.setAttribute("open", "");
+            });
+        }
         dialog.addEventListener("click", (e) => {
             if (e.target === dialog) dialog.close();
         });
@@ -186,6 +210,7 @@
                     forms.login.reset();
                     showMessage(loginMsg, "", null);
                     setLoggedIn(data);
+                    window.location.href = "/perfil";
                 } else if (status === 401) {
                     showMessage(loginMsg, "Usuário ou senha inválidos.", "error");
                 } else {
@@ -224,6 +249,7 @@
                     forms.register.reset();
                     showMessage(registerMsg, "", null);
                     setLoggedIn(login.data);
+                    window.location.href = "/perfil";
                 } else {
                     showMessage(registerMsg, "Conta criada. Faça login para entrar.", "success");
                 }
