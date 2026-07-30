@@ -216,6 +216,24 @@ Cada botão declara três atributos que identificam o item de forma estável:
 A página `painel.html` lê `GET /progress` e mostra o que o usuário marcou, agrupado
 em "Problemas resolvidos" e "Referências lidas".
 
+## Banco de Dados 
+
+O projeto usa o SQLite para o armazenamento dos dados da aplicação. 
+
+As principais tabelas criadas foram: 
+- `users`: armazena credenciais e papeis de usuários.
+- `progress`: registra o progresso de cada usuário.
+- `goals`: registra as metas de estudo dos usuários.
+- `login_days`: registra os dias em que os usuários acessaram o site.
+- `levels`: representa os níveis disponíveis.
+- `topics`: armazena os conteúdos pertencentes a cada nível.
+- `topic_items`: armazena referências e problemas associados aos conteúdos.
+- `problem_solutions`: armazena as soluções dos problemas.
+
+Os relacionamentos associam os usuários (`users`) ao seu progresso (`progress`), metas (`goals`) e streak (`login_days`), mas 
+também os níveis (`levels`) aos conteúdos (`topics`), e os conteúdos (`topics`) aos problemas e referências (`topic_items`). Além disso, 
+associamos os problemas (`topic_items`) às suas soluções (`problem_solutions`). 
+
 ## Testes 
 
 Os testes automatizados foram desenvolvidos com o **Pytest**, utilizando fixtures e ambientes isolados para os testes. 
@@ -232,6 +250,7 @@ de conteúdos, problemas, referências e soluções pelos administradores.
 
 ## Autores 
 
+- Bruno Levi
 - Erick Henrique Imai Rodrigues 
 - Guilherme Ryuji Osato 
 - Sara Miyuka Abe
