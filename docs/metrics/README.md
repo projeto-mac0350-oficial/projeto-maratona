@@ -29,10 +29,14 @@ Registro das métricas de **complexidade** e **manutenibilidade** do backend
 
 ## Relatórios por milestone
 
-| Milestone               | Data       | Arquivos | SLOC | CC média  | MI         | Pylint   | Relatório |
-| ----------------------- | ---------- | -------- | ---- | --------- | ---------- | -------- | --------- |
-| 1 — Autenticação        | 2026-06-28 | 1        | 87   | A (2,44)  | A (57,5)   | 9,05/10  | [milestone-1-auth.md](milestone-1-auth.md) |
-| 2 — Progresso + painel  | 2026-06-28 | 1        | 143  | A (2,91)  | A (51,9)   | 9,25/10  | [milestone-2-progress.md](milestone-2-progress.md) |
+Números do **backend inteiro** (o que o script mede). Nos milestones 1 e 2 isso era
+só o `app.py`; a partir do 3 entram também os arquivos de teste.
+
+| Milestone                       | Data       | Arquivos | SLOC | CC média  | MI            | Pylint   | Relatório |
+| ------------------------------- | ---------- | -------- | ---- | --------- | ------------- | -------- | --------- |
+| 1 — Autenticação                | 2026-06-28 | 1        | 87   | A (2,44)  | A (57,5)      | 9,05/10  | [milestone-1-auth.md](milestone-1-auth.md) |
+| 2 — Progresso + painel          | 2026-06-28 | 1        | 143  | A (2,91)  | A (51,9)      | 9,25/10  | [milestone-2-progress.md](milestone-2-progress.md) |
+| 3 — Testes, conteúdo, atividade | 2026-07-30 | 6        | 619  | A (3,00)  | A (42,8–94,1) | 8,56/10  | [milestone-3-conteudo-atividade.md](milestone-3-conteudo-atividade.md) |
 
 > A cada entrega: rode o script (ou baixe o artefato do CI), salve
 > `docs/metrics/milestone-N.md`, acrescente uma linha aqui e copie para a wiki.
@@ -105,3 +109,61 @@ milestone 1:
 rank A, pylint acima de 9), mas a queda do MI é o primeiro sinal mensurável de que a
 arquitetura de arquivo único tem prazo de validade. A próxima refatoração para módulos
 deve ser avaliada quando o MI se aproximar do limite do rank A.
+
+## Evolução — milestone 2 → 3
+
+A entrega 3 juntou quatro frentes: **suíte de testes** (`backend/tests/`, 5 arquivos),
+**API de conteúdo** (`GET /content/topics`, `GET /content/topics/<id>`, com dificuldade
+dos problemas), **autenticação nas páginas de conteúdo** e **registro de atividade**
+(`GET /activity`, dias de login + streak, que alimenta o mini calendário da home).
+Tudo continua no mesmo `app.py`.
+
+### Trajetória do `app.py` (série comparável)
+
+Como os milestones 1 e 2 mediam só o `app.py`, a tabela abaixo isola esse arquivo para
+a comparação ser justa:
+
+| Métrica  | M1 (auth) | M2 (progresso) | M3 (conteúdo + atividade) | Variação M2 → M3 |
+| -------- | --------- | -------------- | ------------------------- | ---------------- |
+| SLOC     | 87        | 143            | 357                       | +214             |
+| CC média | A (2,44)  | A (2,91)       | A (3,17)                  | +0,26            |
+| MI       | A (57,5)  | A (51,9)       | A (42,8)                  | −9,1             |
+| Pylint   | 9,05/10   | 9,25/10        | 9,57/10                   | +0,32            |
+
+- **O `app.py` mais que dobrou (143 → 357 SLOC)** e o **MI caiu de novo (51,9 → 42,8)**,
+  mantendo o ritmo de ~−9 por entrega. Continua no rank **A** — a faixa vai até 20 na
+  escala do radon, então ainda há folga —, mas a tendência é monotônica e confirma o
+  diagnóstico dos milestones anteriores: o arquivo único está no limite do que
+  comporta bem.
+- **A complexidade não acompanhou o tamanho (2,91 → 3,17).** O código novo é largamente
+  *declarativo* — `CONTENT` (o catálogo de tópicos), `seed_content` e `_serialize_item`
+  são dados e serialização, não ramificação. Os picos seguem sendo `login` **B (8)**,
+  `set_progress` **B (8)** e `register` **B (7)**, os mesmos do milestone 1; o mais alto
+  entre os novos é `get_topic` **B (6)**. **Nenhum bloco chega a C.**
+- **Pylint subiu para 9,57/10** no `app.py`: só restam a docstring de módulo e cinco
+  handlers antigos (`health`, `register`, `login`, `logout`, `me`) sem docstring.
+
+### O que muda com a suíte de testes
+
+Os testes entram nas métricas a partir daqui e explicam as diferenças entre a tabela do
+backend inteiro e a série do `app.py`:
+
+- **CC média do conjunto cai para A (3,00)**, abaixo dos 3,17 do `app.py`: são 65 blocos
+  no total (contra 18 antes), e os testes são lineares. **Nenhum teste passa de B.**
+- **MI dos testes é alto** (67,0 / 63,9 / 61,3 / 53,3 e 94,1 no `conftest.py`), o que
+  puxa a média do projeto para cima — por isso a coluna MI da tabela mostra uma faixa,
+  e não um número só.
+- **Pylint do conjunto cai para 8,56/10** enquanto o do `app.py` sobe. A queda é quase
+  toda `missing-function-docstring` nos testes, cujo nome já descreve o caso, mais dois
+  avisos reais no `conftest.py` (`wrong-import-position`, `redefined-outer-name`,
+  ambos consequência do `sys.path` ajustado para importar o app). É ruído de convenção,
+  não dívida técnica — vale considerar um `.pylintrc` que relaxe `C0116` em
+  `backend/tests/` para a nota voltar a medir o código de produção.
+
+**Leitura de engenharia:** o projeto ganhou cobertura de testes e três features sem
+piorar a testabilidade (CC estável, nada acima de B), e a qualidade estática do código
+de produção melhorou. O sinal a acompanhar continua sendo o **MI do `app.py`**: três
+entregas, três quedas (57,5 → 51,9 → 42,8). Se o próximo milestone repetir o padrão, a
+separação em **blueprints** (`auth`, `content`, `progress`, `activity` + camada de
+acesso ao banco) deixa de ser opcional — é a refatoração que redistribui volume e
+recupera o índice.
