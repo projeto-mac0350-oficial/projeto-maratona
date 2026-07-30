@@ -45,7 +45,7 @@ projeto-maratona/
 │   ├── progress-bar.js            # gera e atualiza as barras de progresso dos conteúdos
 │   ├── progress.js                # controla e salva o progresso dos conteúdos
 │   ├── solution.css               # estilos da página de solução dos problemas
-│   ├── solucao.html               # página de solução de um problema
+│   ├── solution.html               # página de solução de um problema
 │   ├── topic.css                  # estilos específicos de topic.html
 │   ├── topic.html                 # página de conteúdo genérica, estende base.html (renderiza GET /topics/<slug>)
 │   ├── topics-list.css            # estilos da listagem de conteúdos em cartões
