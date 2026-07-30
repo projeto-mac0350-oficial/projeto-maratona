@@ -66,4 +66,4 @@ def test_admin_updates_topic(admin_client):
             (topic["level_id"],)
         ).fetchone()
 
-    assert level["title"] == "Nível 2"
+    assert level["title"] == "Programação 1"

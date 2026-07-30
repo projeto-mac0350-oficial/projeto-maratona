@@ -168,9 +168,10 @@ def init_db():
 # (/conteudos?level=<slug>). Position controls both the menu order and the
 # order topics are grouped in.
 SEED_LEVELS = [
-    {"slug": "nivel_1", "title": "Nível 1"},
-    {"slug": "nivel_2", "title": "Nível 2"},
-    {"slug": "nivel_3", "title": "Nível 3"},
+    {"slug": "nivel_1", "title": "Programação Júnior"},
+    {"slug": "nivel_2", "title": "Programação 1"},
+    {"slug": "nivel_3", "title": "Programação 2"},
+    {"slug": "bixecamp", "title": "Bixecamp"}
 ]
 
 
@@ -577,7 +578,7 @@ def _serialize_item(topic_slug, row):
         "item_key": f"{topic_slug}:{short}:{row['slug']}",
         # Problems show a 1-based number on the dashboard; refs use their title.
         "label": (
-            f"Problema {row['position'] + 1} - {row['title']}"
+            f"{row['title']}"
             if row["kind"] == "problem"
             else row["title"]
         ),
