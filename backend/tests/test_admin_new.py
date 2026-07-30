@@ -1,3 +1,5 @@
+"""Tests for creating topics, references, and problems through the admin panel"""
+
 import app as flask_app
 
 # --------- GET /admin/topics/new ------------------------

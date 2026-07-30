@@ -1,3 +1,4 @@
+""" Tests for listing and deleting content through the admin panel """
 import app as flask_app
 
 # ------ GET /admin/topics --------------------------
@@ -50,37 +51,14 @@ def test_admin_deletes_topic_and_dependencies(admin_client):
             "summary": "Estudo de grafos",
             "level": "nivel_1",
 
-            "new_problem_title": [
-                "BFS"
-            ],
-
-            "new_problem_url": [
-                "https://example.com/bfs"
-            ],
-
-            "new_problem_difficulty": [
-                "medium"
-            ],
-
-            "new_problem_statement": [
-                "Encontre o caminho mínimo."
-            ],
-
-            "new_problem_explanation": [
-                "Usa fila."
-            ],
-
-            "new_problem_code": [
-                "queue<int> q;"
-            ],
-
-            "new_ref_title": [
-                "CP Algorithms"
-            ],
-
-            "new_ref_url": [
-                "https://example.com/cp"
-            ]
+            "new_problem_title": ["BFS"],
+            "new_problem_url": ["https://example.com/bfs"],
+            "new_problem_difficulty": [  "medium"],
+            "new_problem_statement": [ "Encontre o caminho mínimo."],
+            "new_problem_explanation": ["Usa fila."],
+            "new_problem_code": ["queue<int> q;"],
+            "new_ref_title": ["CP Algorithms"],
+            "new_ref_url": [ "https://example.com/cp"]
         }
     )
 
@@ -166,30 +144,12 @@ def test_admin_deletes_problem_and_solution(admin_client):
             "title": "Grafos",
             "summary": "Estudo de grafos",
             "level": "nivel_1",
-
-            "new_problem_title": [
-                "BFS"
-            ],
-
-            "new_problem_url": [
-                "https://example.com/bfs"
-            ],
-
-            "new_problem_difficulty": [
-                "medium"
-            ],
-
-            "new_problem_statement": [
-                "Encontre o menor caminho."
-            ],
-
-            "new_problem_explanation": [
-                "Usamos BFS."
-            ],
-
-            "new_problem_code": [
-                "queue<int> q;"
-            ]
+            "new_problem_title": [ "BFS"],
+            "new_problem_url": ["https://example.com/bfs"],
+            "new_problem_difficulty": ["medium"],
+            "new_problem_statement": ["Encontre o menor caminho." ],
+            "new_problem_explanation": ["Usamos BFS."],
+            "new_problem_code": ["queue<int> q;"]
         }
     )
 
@@ -257,14 +217,8 @@ def test_admin_deletes_reference(admin_client):
             "title": "Grafos",
             "summary": "Estudo de grafos",
             "level": "nivel_1",
-
-            "new_ref_title": [
-                "CP Algorithms"
-            ],
-
-            "new_ref_url": [
-                "https://example.com/cp-algorithms"
-            ]
+            "new_ref_title": ["CP Algorithms"],
+            "new_ref_url": ["https://example.com/cp-algorithms"]
         }
     )
 

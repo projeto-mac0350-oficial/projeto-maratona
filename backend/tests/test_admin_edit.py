@@ -1,3 +1,4 @@
+""" Tests for updating topics through the admin panel """
 import app as flask_app
 
 # -------- POST /admin/topics/<slug>/edit ----------------------
@@ -19,7 +20,6 @@ def test_admin_updates_topic(admin_client):
             "title": "Grafos Avançados",
             "summary": "Resumo atualizado",
             "level": "nivel_2",
-
             "problem_id": [],
             "problem_title": [],
             "problem_url": [],
@@ -27,14 +27,12 @@ def test_admin_updates_topic(admin_client):
             "problem_statement": [],
             "problem_explanation": [],
             "problem_code": [],
-
             "new_problem_title": [],
             "new_problem_url": [],
             "new_problem_difficulty": [],
             "new_problem_statement": [],
             "new_problem_explanation": [],
             "new_problem_code": [],
-
             "new_ref_title": [],
             "new_ref_url": [],
         }

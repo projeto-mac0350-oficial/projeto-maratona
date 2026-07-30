@@ -1,4 +1,4 @@
-import app as flask_app
+""" Tests for admin authentication """
 
 # ------------- /admin --------------------------------
 def test_admin_can_login(admin_client):
