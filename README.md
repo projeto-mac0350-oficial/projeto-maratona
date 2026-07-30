@@ -8,29 +8,44 @@ O backend também serve as páginas do frontend, então tudo roda na mesma orige
 
 ```
 projeto-maratona/
-├── backend/                # API Flask + serve o frontend
-│   ├── app.py              # rotas, init_db(), auth (register/login/logout/me)
+├── backend/                       # API Flask + serve o frontend
+│   ├── app.py                     # rotas, init_db(), auth (register/login/logout/me)
 │   └── requirements.txt
-├── frontend/               # páginas (HTML + CSS)
-│   ├── index.html          # homepage: login/registro + tema claro/escuro
-│   ├── index.css           # estilos da homepage (com tokens de tema)
-│   ├── base.html           # layout compartilhado (header, nav, footer, tema); páginas de conteúdo o estendem via Jinja
-│   ├── topic.html          # página de conteúdo genérica, estende base.html (renderiza GET /topics/<slug>)
-│   ├── topic.css           # estilos específicos de topic.html
-│   ├── topics-list.html    # listagem em cartões: níveis (sem ?level=) ou tópicos de um nível (?level=<slug>)
-│   ├── topics-list.css
-│   ├── solucao.html        # página de solução de um problema
-│   ├── painel.html         # dashboard: progresso do usuário logado
-│   ├── progress.js         # persiste os toggles "lido/resolvido" por usuário
-│   ├── calendar.js         # mini calendário: dias logados no mês + sequência (homepage)
-│   ├── calendar.css        # estilos do mini calendário
-│   ├── heatmap.js          # heatmap de atividade (itens concluídos por dia) no perfil
-│   ├── heatmap.css        # estilos do heatmap
-│   ├── auth-widget.js      # controle de login/logout compartilhado (botão + modal)
-│   ├── auth-widget.css     # estilos do controle de login (tokens com fallback)
-│   ├── base.css            # cabeçalho/identidade visual compartilhada
-│   └── solucao.css
-├── PLAN.md                 # plano de entrega (PRs atômicos)
+├── frontend/                      # páginas (HTML + CSS + JavaScript)
+│   ├── images/
+│   │   └── favicon.png            # ícone exibido na aba do navegador
+│   ├── auth-widget.css            # estilos do controle de login (tokens com fallback)
+│   ├── auth-widget.js             # controle de login/logout compartilhado (botão + modal)
+│   ├── base.css                   # cabeçalho/identidade visual compartilhada
+│   ├── base.html                  # layout compartilhado (header, nav, footer, tema); páginas de conteúdo o estendem via Jinja
+│   ├── calendar.css               # estilos do mini calendário
+│   ├── calendar.js                # mini calendário: dias logados no mês + sequência (homepage)
+│   ├── goals.css                  # estilos das metas
+│   ├── goals.js                   # gerenciamento de metas: criação, listagem e exclusão
+│   ├── heatmap.css                # estilos do heatmap
+│   ├── heatmap.js                 # heatmap de atividade (itens concluídos por dia) no perfil
+│   ├── index.css                  # estilos da homepage (com tokens de tema)
+│   ├── index.html                 # homepage: login/registro + tema claro/escuro
+│   ├── logout-message.css         # estilos da mensagem de logout
+│   ├── logout-message.js          # exibe uma mensagem temporária após o logout
+│   ├── pagina_admin.css           # estilos do painel administrativo
+│   ├── pagina_admin.html          # painel administrativo: listar, criar, editar e excluir conteúdos
+│   ├── pagina_admin_editar.css    # estilos da página de edição de conteúdos
+│   ├── pagina_admin_editar.html   # página edição de conteúdos
+│   ├── pagina_admin_novo.css      # estilos da página de criação de conteúdos
+│   ├── pagina_admin_novo.html     # página de criação de conteúdos
+│   ├── profile.css                # estilos do dashboard do usuário
+│   ├── profile.html               # dashboard do usuário com heatmap, calendário, progresso e metas
+│   ├── progress-bar.css           # estilos das barras de progresso do perfil e dos conteúdos
+│   ├── progress-bar.js            # gera e atualiza as barras de progresso dos conteúdos
+│   ├── progress.js                # controla e salva o progresso dos conteúdos
+│   ├── solution.css               # estilos da página de solução dos problemas
+│   ├── solucao.html               # página de solução de um problema
+│   ├── topic.css                  # estilos específicos de topic.html
+│   ├── topic.html                 # página de conteúdo genérica, estende base.html (renderiza GET /topics/<slug>)
+│   ├── topics-list.css            # estilos da listagem de conteúdos em cartões
+│   └── topics-list.html           # listagem em cartões: níveis (sem ?level=) ou tópicos de um nível (?level=<slug>)
+├── PLAN.md                        # plano de entrega (PRs atômicos)
 └── README.md
 ```
 
