@@ -30,7 +30,7 @@ def test_admin_can_list_topics(admin_client):
 
     assert topic is not None
     assert topic["title"] == "Grafos"
-    assert topic["level"] == "Nível 1"
+    assert topic["level"] == "Programação Júnior"
 
 def test_normal_user_cannot_list_admin_topics(auth_client):
     response = auth_client.get("/admin/topics")
