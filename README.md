@@ -45,7 +45,7 @@ projeto-maratona/
 │   ├── progress-bar.js            # gera e atualiza as barras de progresso dos conteúdos
 │   ├── progress.js                # controla e salva o progresso dos conteúdos
 │   ├── solution.css               # estilos da página de solução dos problemas
-│   ├── solution.html               # página de solução de um problema
+│   ├── solution.html              # página de solução de um problema
 │   ├── topic.css                  # estilos específicos de topic.html
 │   ├── topic.html                 # página de conteúdo genérica, estende base.html (renderiza GET /topics/<slug>)
 │   ├── topics-list.css            # estilos da listagem de conteúdos em cartões
@@ -77,22 +77,36 @@ start e é ignorado pelo Git. Defina `SECRET_KEY` no ambiente para produção.
 | Método | Rota         | Descrição                                             |
 | ------ | ------------ | ----------------------------------------------------- |
 | GET    | `/`          | Homepage (`index.html`)                               |
-| GET    | `/conteudo`  | Página de um tópico (`topic.html`); slug lido de `?topic=<slug>` no client |
-| GET    | `/conteudos` | Listagem em cartões (`topics-list.html`): níveis, ou tópicos de um nível via `?level=<slug>` |
 | GET    | `/health`    | Liveness — `{"status": "ok"}`                         |
 | POST   | `/register`  | `{username, password}` → cria usuário; `409` se já existe, `400` se faltar campo |
 | POST   | `/login`     | `{username, password}` → inicia a sessão; `401` se inválido |
 | POST   | `/logout`    | Encerra a sessão                                      |
 | GET    | `/me`        | Protegida — retorna o usuário logado, ou `401`        |
-| GET    | `/progress`  | Protegida — progresso do usuário, mapa por `item_key` |
-| POST   | `/progress`  | Protegida — salva `{item_key, kind, label, done}`     |
 | GET    | `/activity`  | Protegida — registra o dia e retorna `{today, streak, days}` (dias logados no mês) |
 | GET    | `/heatmap`   | Protegida — retorna `{today, counts}`: itens de progresso concluídos por dia |
+| GET    | `/progress`  | Protegida — progresso do usuário, mapa por `item_key` |
+| POST   | `/progress`  | Protegida — salva `{item_key, kind, label, done}`     |
+| GET    | `/goals`     | Protegida — lista as metas do usuário                 |
+| POST   | `/goals`     | Protegida — cria uma nova meta                        |
+| DELETE | `/goals/<goal_id>` | Protegida — remove uma meta |
 | GET    | `/levels`    | Lista de níveis (`slug`, `title`) — alimenta o menu "Níveis" |
 | GET    | `/levels/<slug>` | Um nível com seus tópicos (`slug`, `title`, `summary`); `404` se não existe |
 | GET    | `/topics`    | Lista de tópicos de estudo (`slug`, `title`, `summary`) |
 | GET    | `/topics/<slug>` | Um tópico com `references` e `problems`; `404` se não existe |
-
+| GET    | `/conteudo`  | Página de um tópico (`topic.html`); slug lido de `?topic=<slug>` no client |
+| GET    | `/conteudos` | Listagem em cartões (`topics-list.html`): níveis, ou tópicos de um nível via `?level=<slug>` |
+| GET    | `/perfil`    | Protegida — dashboard do usuário (`profile.html`) |
+| GET | `/admin` | Protegida (admin) — painel administrativo |
+| GET | `/admin/topics/new` | Protegida (admin) — página de criação de conteúdo |
+| POST | `/admin/topics/new` | Protegida (admin) — cria um novo conteúdo |
+| GET | `/admin/topics/<slug>/edit` | Protegida (admin) — página de edição de um conteúdo |
+| POST | `/admin/topics/<slug>/edit` | Protegida (admin) — salva as alterações de um conteúdo |
+| GET | `/admin/topics` | Protegida (admin) — lista os conteúdos cadastrados |
+| DELETE | `/admin/topics/<slug>` | Protegida (admin) — remove um conteúdo |
+| DELETE | `/admin/problems/<problem_id>` | Protegida (admin) — remove um problema |
+| DELETE | `/admin/references/<ref_id>` | Protegida (admin) — remove uma referência |
+| GET | `/solucao` | Página de solução de um problema (`solution.html`) |
+| GET | `/solutions/<slug>` | Retorna os dados completos da solução de um problema |
 
 As senhas são guardadas com hash (`werkzeug.security`) e a sessão usa cookie
 assinado do Flask.
