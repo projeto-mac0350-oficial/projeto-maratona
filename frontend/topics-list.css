@@ -2,15 +2,19 @@
    Listagem de conteúdos
    ====================== */
 .topics-list {
-    max-width: 1500px;
+    width: 100%;
+    max-width: 1080px;
     padding: 3rem 2rem 6rem;
     margin: 0 40px;
 }
 
 .topics-list h1 {
-    color: var(--primary);
+    color: var(--text-strong);
+
     font-size: 3rem;
-    margin-bottom: 2rem;
+    font-family: 'IBM Plex Mono', monospace;
+
+    margin-bottom: 1rem;
 }
 
 .topics-status {

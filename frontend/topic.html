@@ -138,6 +138,7 @@ Projeto Maratona
                 box.appendChild(bar);
             }
             box.appendChild(makeTitle(problem.label, problem.url, "problem-title-link"));
+            box.appendChild(makeToggle(problem, "ac-btn na", "NA"));
             if (problem.solution_url) {
                 const sol = document.createElement("a");
                 sol.className = "solution-btn";
@@ -145,7 +146,6 @@ Projeto Maratona
                 sol.textContent = "Solução";
                 box.appendChild(sol);
             }
-            box.appendChild(makeToggle(problem, "ac-btn na", "NA"));
             problemsEl.appendChild(box);
         });
         document.getElementById("problems-section").hidden = false;

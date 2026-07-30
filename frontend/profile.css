@@ -3,7 +3,7 @@
    ====================== */
 
 .perfil {
-    max-width: 1000px;
+    max-width: 1080px;
 
     margin: 0 40px;
 
@@ -15,11 +15,17 @@
    ====================== */
 
 .perfil h1 {
-    color: var(--primary);
+    color: var(--text-strong);
 
     font-size: 3rem;
+    font-family: 'IBM Plex Mono', monospace;
 
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
+}
+
+#painel-summary {
+    font-family: "IBM Plex Mono", monospace;
+    color: var(--primary);
 }
 
 .perfil h2 {
@@ -28,6 +34,18 @@
     margin-bottom: 1rem;
 
     color: var(--text);
+}
+
+/* ======================
+   Grid
+   ====================== */
+
+.painel-grid {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    align-items: start;
+    gap: 1.5rem;
+    padding: 2rem 0 2rem;
 }
 
 /* ======================
@@ -54,11 +72,11 @@
    Últimos acessados
    ====================== */
 
-.perfil ul {
+.perfil .painel-list {
     list-style: none;
 }
 
-.perfil li {
+.perfil .painel-list li {
     padding: 0.8rem 1rem;
 
     border-bottom: 1px solid var(--border);
@@ -67,11 +85,11 @@
     color: var(--text);
 }
 
-.perfil li:last-child {
+.perfil .painel-list li:last-child {
     border-bottom: none;
 }
 
-.perfil li:hover {
+.perfil .painel-list li:hover {
     background: var(--primary-light);
 }
 
@@ -194,5 +212,11 @@ Barras de progresso
 
     .perfil section {
         padding: 1rem;
+    }
+}
+
+@media (max-width: 860px) {
+    .perfil-grid {
+        grid-template-columns: 1fr;
     }
 }

@@ -20,64 +20,72 @@ MaratonUSP Ensina - Meu painel
     <div class="perfil">
 
     <h1>Olá, <span id="account-username"></span>!</h1>
+    <div id="painel-summary"></div>
    
-    <section>
-        <h2>Sua atividade</h2>
-        <div id="heatmap" class="heatmap" aria-label="Heatmap de atividade"></div>
+    <div class="painel-grid">
+        <div id="column1">
+            <section>
+            <h2>Sua atividade</h2>
+            <div id="heatmap" class="heatmap" aria-label="Heatmap de atividade"></div>
+            </section>
 
-    </section>
+            <section>
+            <h2>Seu progresso</h2>
+            <div id="progresso-niveis"></div>
+            </section>
 
-    <section>
-        <h2>Sua streak</h2>
-        <!-- Mês atual com os dias logados marcados; preenchido por calendar.js -->
-        <div id="mini-calendar" class="mini-calendar" aria-label="Calendário de atividade"></div>
-    </section>
+            <section>
+                <h2>Suas metas</h2>
 
-    <section>
-        <h2>Progresso</h2>
-        <div id="progresso-niveis"></div>
-    </section>
+                <ul class="metas-list" id="metas-list"></ul>
 
-     <section>
-        <h2 class="section-heading">Últimos Problemas resolvidos</h2>
-        <ul class="painel-list" id="list-problems"></ul>
-    </section>
+                <form class="meta-form hidden" id="meta-form">
+                    <label class="meta-form-field">
+                        Descrição
+                        <input type="text" id="meta-descricao" maxlength="100" required
+                            placeholder="Ex.: Resolver 5 problemas de grafos">
+                    </label>
 
-    <section>
-        <h2 class="section-heading">Últimas Referências lidas</h2>
-        <ul class="painel-list" id="list-refs"></ul>
-    </section>
+                    <label class="meta-form-field meta-form-field-date">
+                        Prazo (opcional)
+                        <span class="meta-form-date">
+                            <input type="number" id="meta-dia" min="1" max="31" placeholder="Dia">
+                            <input type="number" id="meta-mes" min="1" max="12" placeholder="Mês">
+                        </span>
+                    </label>
 
-    <section>
-        <h2>Suas metas</h2>
+                    <p class="meta-form-error hidden" id="meta-form-error"></p>
 
-        <ul class="metas-list" id="metas-list"></ul>
+                    <div class="meta-form-actions">
+                        <button type="submit" class="btn-link">Salvar</button>
+                        <button type="button" class="btn-link btn-secondary" id="meta-cancelar">Cancelar</button>
+                    </div>
+                </form>
 
-        <form class="meta-form hidden" id="meta-form">
-            <label class="meta-form-field">
-                Descrição
-                <input type="text" id="meta-descricao" maxlength="100" required
-                       placeholder="Ex.: Resolver 5 problemas de grafos">
-            </label>
+                <button type="button" id="btn-definir-meta">Definir meta</button>
+            </section>
+        </div>
+        <div id="column2">
+            <section>
+                <h2>Sua streak</h2>
+                <!-- Mês atual com os dias logados marcados; preenchido por calendar.js -->
+                <div id="mini-calendar" class="mini-calendar" aria-label="Calendário de atividade"></div>
+            </section>
 
-            <label class="meta-form-field meta-form-field-date">
-                Prazo (opcional)
-                <span class="meta-form-date">
-                    <input type="number" id="meta-dia" min="1" max="31" placeholder="Dia">
-                    <input type="number" id="meta-mes" min="1" max="12" placeholder="Mês">
-                </span>
-            </label>
+            <section>
+                <h2 class="section-heading">Seus problemas resolvidos</h2>
+                <ul class="painel-list" id="list-problems"></ul>
+            </section>
 
-            <p class="meta-form-error hidden" id="meta-form-error"></p>
+            <section>
+                <h2 class="section-heading">Suas referências lidas</h2>
+                <ul class="painel-list" id="list-refs"></ul>
+            </section>
+        </div>
 
-            <div class="meta-form-actions">
-                <button type="submit" class="btn-link">Salvar</button>
-                <button type="button" class="btn-link btn-secondary" id="meta-cancelar">Cancelar</button>
-            </div>
-        </form>
+        
 
-        <button type="button" id="btn-definir-meta">Definir meta</button>
-    </section>
+    </div>
 
     </div>
 
@@ -141,7 +149,7 @@ function render(progress) {
     fillList(document.getElementById("list-refs"), refs, "Nenhuma referência lida ainda.");
  
     document.getElementById("painel-summary").textContent =
-        `${problems.length} problema(s) resolvido(s) · ${refs.length} referência(s) lida(s)`;
+        `// ${problems.length} problema(s) resolvido(s) · ${refs.length} referência(s) lida(s)`;
 }
 
 
