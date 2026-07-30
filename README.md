@@ -6,8 +6,7 @@ O backend também serve as páginas do frontend, então tudo roda na mesma orige
 
 ## Funcionalidades 
 
-- Cadastro e autenticação de usuários
-- Login e logout de usuários 
+- Cadastro, login e logout de usuários 
 - Acesso a conteúdos organizados nos níveis: Programação Junior, Programação 1, Programação 2 e Bixecamp 
 - Visualização de conteúdos com problemas, referências e soluções
 - Acesso à página de solução de cada problema
@@ -29,6 +28,10 @@ O backend também serve as páginas do frontend, então tudo roda na mesma orige
 - HTML
 - CSS
 - JavaScript
+
+### Métricas 
+- Radon
+- Pylint
 
 ### Ferramentas
 - Git
@@ -192,13 +195,9 @@ usados pelo `progress.js`, permitindo persistir o progresso do usuário.
 Cada problema também traz uma `difficulty` (`easy`/`medium`/`hard`) que vira a
 barra de cor (verde/amarelo/vermelho) ao lado do título.
 
-O painel administrativo é acessível apenas para usuários
-administradores. As páginas `pagina_admin.html`,
-`pagina_admin_novo.html` e `pagina_admin_editar.html` permitem listar
-os conteúdos agrupados por nível, criar novos tópicos, editar
-informações, adicionar e remover referências e problemas, além de
-excluir conteúdos existentes. Todas essas operações são realizadas por
-meio das rotas `/admin/*`.
+O painel administrativo é acessivel apenas para usuários administradores, verificado pelo campo 
+`is_admin` da tabela `users`. Neste é possível a criação, edição e exclusão de conteúdos, problemas, 
+referências e soluções. Essas operações são realizadas por meio das rotas `/admin/*`.
 
 
 ## Progresso de estudos
@@ -216,3 +215,11 @@ Cada botão declara três atributos que identificam o item de forma estável:
 
 A página `painel.html` lê `GET /progress` e mostra o que o usuário marcou, agrupado
 em "Problemas resolvidos" e "Referências lidas".
+
+## Autores 
+
+- Erick Henrique Imai Rodrigues 
+- Guilherme Ryuji Osato 
+- Sara Miyuka Abe
+
+
