@@ -216,6 +216,20 @@ Cada botão declara três atributos que identificam o item de forma estável:
 A página `painel.html` lê `GET /progress` e mostra o que o usuário marcou, agrupado
 em "Problemas resolvidos" e "Referências lidas".
 
+## Testes 
+
+Os testes automatizados foram desenvolvidos com o **Pytest**, utilizando fixtures e ambientes isolados para os testes. 
+As principais fixtures foram:
+
+- `client`: cria um cliente de teste com um banco SQLite temporário.
+- `auth_client`: cria um cliente já autenticado, permitindo testar funcionalidades que exigem login. 
+- `admin_client`: cria um usuário administrador autenticado, permitindo testar funcionalidades restritas aos administradores.
+
+Os testes abrangem a autenticação de usuários comuns e administradores, visualização dos conteúdos, problemas, referências e soluções,
+funcionamento das metas, heatmap, streak e progresso, além do acesso ao dashboard. Também foram testadas as operações de criação, edição e exclusão
+de conteúdos, problemas, referências e soluções pelos administradores. 
+
+
 ## Autores 
 
 - Erick Henrique Imai Rodrigues 
