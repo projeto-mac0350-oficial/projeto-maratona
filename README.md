@@ -1,4 +1,4 @@
-# Projeto Maratona
+# MaratonUSP Ensina 
 
 Plataforma de estudos para maratona de programação: um backend Flask com
 autenticação por sessão e um frontend com páginas de conteúdo e soluções.
