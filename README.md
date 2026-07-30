@@ -9,8 +9,13 @@ O backend também serve as páginas do frontend, então tudo roda na mesma orige
 ```
 projeto-maratona/
 ├── backend/                       # API Flask + serve o frontend
-│   ├── app.py                     # rotas, init_db(), auth (register/login/logout/me)
-│   └── requirements.txt
+│   ├── tests/                     # testes automatizados
+│   ├── app.py                     # aplicação principal
+│   ├── pytest.ini                 # configuração do pytest
+│   ├── requirements.txt     
+│   └── requirements-dev.txt 
+├── docs/
+│   └── metrics/                   # documentação de métricas e milestones
 ├── frontend/                      # páginas (HTML + CSS + JavaScript)
 │   ├── images/
 │   │   └── favicon.png            # ícone exibido na aba do navegador
@@ -45,6 +50,9 @@ projeto-maratona/
 │   ├── topic.html                 # página de conteúdo genérica, estende base.html (renderiza GET /topics/<slug>)
 │   ├── topics-list.css            # estilos da listagem de conteúdos em cartões
 │   └── topics-list.html           # listagem em cartões: níveis (sem ?level=) ou tópicos de um nível (?level=<slug>)
+├── scripts/                       # scripts auxiliares
+│   └── metrics.sh                 # geração de métricas
+├── .gitignore                     # arquivos ignorados pelo Git
 ├── PLAN.md                        # plano de entrega (PRs atômicos)
 └── README.md
 ```
