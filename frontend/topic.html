@@ -22,6 +22,11 @@ Projeto Maratona
 
     <section id="problems-section" hidden>
         <h2 class="section-title">Lista de problemas</h2>
+        <div class="difficulty-legend" aria-label="Legenda de dificuldade dos problemas">
+                <span class="legend-item"><i class="dot dot-easy"></i>Fácil</span>
+                <span class="legend-item"><i class="dot dot-medium"></i>Médio</span>
+                <span class="legend-item"><i class="dot dot-hard"></i>Difícil</span>
+            </div>
         <div id="problems"></div>
     </section>
 
@@ -133,6 +138,7 @@ Projeto Maratona
                 box.appendChild(bar);
             }
             box.appendChild(makeTitle(problem.label, problem.url, "problem-title-link"));
+            box.appendChild(makeToggle(problem, "ac-btn na", "NA"));
             if (problem.solution_url) {
                 const sol = document.createElement("a");
                 sol.className = "solution-btn";
@@ -140,7 +146,6 @@ Projeto Maratona
                 sol.textContent = "Solução";
                 box.appendChild(sol);
             }
-            box.appendChild(makeToggle(problem, "ac-btn na", "NA"));
             problemsEl.appendChild(box);
         });
         document.getElementById("problems-section").hidden = false;

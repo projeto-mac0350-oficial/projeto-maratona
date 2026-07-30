@@ -4,25 +4,153 @@
 MaratonUSP Ensina - Início
 {% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="/index.css">
+{% endblock %}
+
 {% block content %}
 
 <div class="home">
 
     <!-- HERO -->
     <section class="hero">
-        <h1 class="title">MaratonUSP<br>Ensina</h1>
-        <h2>
-            Um guia de programação competitiva, OBI, Maratona e Mais!
-        </h2>
-         <div id="usaco"><i>INSPIRADO NO <a href="https://usaco.guide/">USACO GUIDE</a></i></div>
-        <div class="description">
-            Plataforma de estudos para maratona de programação: conteúdos,
-            listas de problemas e soluções comentadas. Use o botão
-            <strong>Entrar</strong> no topo para acessar a sua conta e
-            acompanhar o seu progresso.
+
+        <div class="hero-copy">
+            <p class="eyebrow">// treino pra programação competitiva</p>
+
+            <h1 class="title">MaratonUSP<br>Ensina</h1>
+
+            <p class="description">
+                Conteúdo organizado por nível, listas de problemas separados por dificuldade e um jeito simples de acompanhar sua sequência de
+                estudo — inspirado no <a href="https://usaco.guide/" target="_blank" rel="noopener">USACO Guide</a>.
+            </p>
+
+            <div class="hero-actions">
+                <button id="btn-comecar" class="btn-primary" type="button">Começar</button>
+                <a href="/perfil" id="btn-comecar-logged" class="btn-primary hidden">Ver painel</a>
+            </div>
+
         </div>
+
+        <svg viewBox="0 0 480 360" class="graph-svg" aria-hidden="true">
+            <g class="edges">
+                <line id="edge-0-1" x1="240" y1="56" x2="132" y2="128"></line>
+                <line id="edge-0-2" x1="240" y1="56" x2="252" y2="136"></line>
+                <line id="edge-0-3" x1="240" y1="56" x2="362" y2="122"></line>
+                <line id="edge-1-4" x1="132" y1="128" x2="70" y2="206"></line>
+                <line id="edge-1-5" x1="132" y1="128" x2="170" y2="212"></line>
+                <line id="edge-2-6" x1="252" y1="136" x2="205" y2="222"></line>
+                <line id="edge-2-7" x1="252" y1="136" x2="268" y2="232"></line>
+                <line id="edge-2-8" x1="252" y1="136" x2="322" y2="214"></line>
+                <line id="edge-3-9" x1="362" y1="122" x2="382" y2="208"></line>
+                <line id="edge-4-10" x1="70" y1="206" x2="54" y2="292"></line>
+                <line id="edge-6-11" x1="205" y1="222" x2="176" y2="298"></line>
+                <line id="edge-6-12" x1="205" y1="222" x2="248" y2="304"></line>
+                <line id="edge-9-13" x1="382" y1="208" x2="372" y2="288"></line>
+            </g>
+            <g class="nodes">
+                <circle class="node" id="node-0" data-id="0" cx="240" cy="56" r="10"></circle>
+                <circle class="node" id="node-1" data-id="1" cx="132" cy="128" r="10"></circle>
+                <circle class="node" id="node-2" data-id="2" cx="252" cy="136" r="10"></circle>
+                <circle class="node" id="node-3" data-id="3" cx="362" cy="122" r="10"></circle>
+                <circle class="node" id="node-4" data-id="4" cx="70" cy="206" r="10"></circle>
+                <circle class="node" id="node-5" data-id="5" cx="170" cy="212" r="10"></circle>
+                <circle class="node" id="node-6" data-id="6" cx="205" cy="222" r="10"></circle>
+                <circle class="node" id="node-7" data-id="7" cx="268" cy="232" r="10"></circle>
+                <circle class="node" id="node-8" data-id="8" cx="322" cy="214" r="10"></circle>
+                <circle class="node" id="node-9" data-id="9" cx="382" cy="208" r="10"></circle>
+                <circle class="node" id="node-10" data-id="10" cx="54" cy="292" r="10"></circle>
+                <circle class="node" id="node-11" data-id="11" cx="176" cy="298" r="10"></circle>
+                <circle class="node" id="node-12" data-id="12" cx="248" cy="304" r="10"></circle>
+                <circle class="node" id="node-13" data-id="13" cx="372" cy="288" r="10"></circle>
+            </g>
+        </svg>
+
     </section>
 
 
 </div>
+
+{% block extra_js %}
+<script>
+(function () {
+    const svg = document.querySelector(".graph-svg");
+    if (!svg) return;
+
+    const EDGE_LIST = [
+        [0, 1], [0, 2], [0, 3],
+        [1, 4], [1, 5],
+        [2, 6], [2, 7], [2, 8],
+        [3, 9],
+        [4, 10],
+        [6, 11], [6, 12],
+        [9, 13],
+    ];
+
+    const adjacency = {};
+    EDGE_LIST.forEach(([a, b]) => {
+        (adjacency[a] = adjacency[a] || []).push(b);
+        (adjacency[b] = adjacency[b] || []).push(a);
+    });
+
+    function edgeId(a, b) {
+        return `edge-${Math.min(a, b)}-${Math.max(a, b)}`;
+    }
+
+    // Ordem de visita de uma BFS a partir de startId, junto com a aresta
+    // usada para alcançar cada nó (pra poder acender nó e aresta juntos).
+    function bfsOrder(startId) {
+        const visited = new Set([startId]);
+        const queue = [startId];
+        const order = [{ node: startId, edge: null }];
+        while (queue.length) {
+            const current = queue.shift();
+            (adjacency[current] || []).forEach((next) => {
+                if (!visited.has(next)) {
+                    visited.add(next);
+                    queue.push(next);
+                    order.push({ node: next, edge: edgeId(current, next) });
+                }
+            });
+        }
+        return order;
+    }
+
+    let pendingTimers = [];
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    function resetGraph() {
+        pendingTimers.forEach(clearTimeout);
+        pendingTimers = [];
+        svg.querySelectorAll(".visited").forEach((el) => el.classList.remove("visited"));
+    }
+
+    function playBFS(startId) {
+        resetGraph();
+        const order = bfsOrder(startId);
+        const step = reduceMotion ? 0 : 190;
+        order.forEach((entry, i) => {
+            const timer = setTimeout(() => {
+                document.getElementById(`node-${entry.node}`).classList.add("visited");
+                if (entry.edge) {
+                    const edgeEl = document.getElementById(entry.edge);
+                    if (edgeEl) edgeEl.classList.add("visited");
+                }
+            }, i * step);
+            pendingTimers.push(timer);
+        });
+    }
+
+    svg.querySelectorAll(".node").forEach((nodeEl) => {
+        nodeEl.addEventListener("mouseenter", () => {
+            playBFS(Number(nodeEl.dataset.id));
+        });
+    });
+
+    // Um primeiro percurso automático ao carregar a página, como uma
+    // pequena demonstração antes de alguém passar o mouse.
+    window.setTimeout(() => playBFS(0), 400);
+})();
+</script>
+{% endblock %}
 {% endblock %}

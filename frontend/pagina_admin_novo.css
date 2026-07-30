@@ -3,8 +3,9 @@
    ====================== */
 
 .admin-new {
+    width: 100%;
 
-    max-width: 1000px;
+    max-width: 1080px;
 
     margin: 0 40px;
 
@@ -20,10 +21,7 @@
 .page-header {
 
     display: flex;
-
-    align-items: center;
-
-    gap: 1rem;
+    flex-direction: column;
 
     margin-bottom: 2rem;
 
@@ -32,11 +30,12 @@
 
 .page-header h1 {
 
-    color: var(--primary);
+    color: var(--text-strong);
 
     font-size: 3rem;
+    font-family: 'IBM Plex Mono', monospace;
 
-    margin: 0;
+    margin-bottom: 1rem;
 
 }
 

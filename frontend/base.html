@@ -9,8 +9,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap" rel="stylesheet">
 
+    <link rel="icon"
+      href="{{ url_for('static', filename='images/favicon.png') }}"
+      type="image/png">
+
     <link rel="stylesheet" href="/base.css">
-    <link rel="stylesheet" href="/index.css">
     <link rel="stylesheet" href="/auth-widget.css">
     <link rel="stylesheet" href="/logout-message.css">
     {% block extra_css %}{% endblock %}
@@ -42,7 +45,7 @@
                 </button>
                 <div class="nav-dropdown-menu" id="niveis-menu" hidden></div>
             </div>
-            <a href="/perfil" id="btn-logado" class="nav-button hidden">Perfil</a>
+            <a href="/perfil" id="btn-logado" class="nav-button hidden">Dashboard</a>
             <a href="/admin" id="btn-admin" class="nav-button hidden">Admin</a>
 
             <!-- Login/logout control injected by auth-widget.js -->

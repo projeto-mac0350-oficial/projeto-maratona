@@ -91,10 +91,6 @@
         const firstColumnStart = addDays(lastColumnStart, -(WEEKS - 1) * 7);
         const colTemplate = `repeat(${WEEKS}, ${CELL_SIZE}px)`;
 
-        mount.appendChild(
-            el("p", "heat-title", `Atividade — últimas ${WEEKS} semanas`)
-        );
-
         const body = el("div", "heat-body");
 
         const weekdayLabels = el("div", "heat-weekday-labels");

@@ -13,7 +13,7 @@
 }
 .metas-list {
     list-style: none;
-    padding: 0;
+    padding: 0.5rem 0;
     margin: 0 0 1rem;
     display: flex;
     flex-direction: column;

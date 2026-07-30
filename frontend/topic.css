@@ -1,5 +1,6 @@
 .bb {
-    max-width: 800px;
+    width: 100%;
+    max-width: 1080px;
     margin: 40px auto;
     padding: 25px;
     background: var(--card-bg);
@@ -11,9 +12,12 @@
 
 /* Título */
 .title {
-    font-size: 38px;
-    margin-bottom: 20px;
-    color: var(--primary);
+    color: var(--text-strong);
+
+    font-size: 3rem;
+    font-family: 'IBM Plex Mono', monospace;
+
+    margin-bottom: 1rem;
 }
 
 /* Texto */
@@ -26,10 +30,50 @@
 
 /* Seções */
 .section-title {
+    position: relative;
     margin-top: 35px;
-    margin-bottom: 15px;
+    margin-bottom: 18px;
+    padding-left: 14px;
     font-size: 24px;
     color: var(--text-strong);
+}
+
+.section-title::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 3px;
+    bottom: 3px;
+    width: 4px;
+    border-radius: 2px;
+    background: var(--primary);
+}
+
+/* LEGENDA DE DIFICULDADE */
+.difficulty-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+.legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
 }
 
 /* REFERÊNCIAS */
@@ -37,61 +81,91 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 12px;
 
     background: var(--field-bg);
     padding: 12px 15px;
     border-radius: 8px;
     margin-bottom: 10px;
+
+    transition: box-shadow 0.18s ease;
+}
+
+.ref-box:hover {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
 }
 
 .ref-box span {
     font-size: 16px;
 }
 
-/* BOTÃO STATUS (REFERÊNCIAS) */
+/* BOTÃO STATUS (REFERÊNCIAS) — pílula com indicador em ponto,
+   ecoando a mesma linguagem visual da legenda de dificuldade */
 .status {
-    width: 95px;
-    height: 36px;
+    min-width: 62px;
+    height: 34px;
 
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 6px;
 
-    border: none;
-    border-radius: 6px;
+    padding: 0 14px;
+    border: 1.5px solid transparent;
+    border-radius: 999px;
 
     cursor: pointer;
 
-    font-size: 14px;
-    font-weight: bold;
+    font-size: 12.5px;
+    font-weight: 800;
+    letter-spacing: 0.03em;
 
-    transition: 0.2s;
+    margin-left: 10px;
+
+    transition: transform 0.15s ease, filter 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .status:hover {
-    opacity: 0.9;
+    transform: translateY(-1px);
 }
 
 .pending {
-    background: #f39c12;
-    color: white;
+    background: var(--card-bg);
+    color: var(--muted);
+    border-color: var(--border);
+}
+.pending:hover {
+    border-color: var(--primary);
+    color: var(--primary);
 }
 
 .done {
-    background: #2ecc71;
+    background: var(--success);
     color: white;
+    border-color: var(--success);
+    box-shadow: 0 2px 8px rgba(46, 204, 113, 0.35);
+}
+.done:hover {
+    filter: brightness(1.06);
 }
 
-/* 🟦 PROBLEMAS */
+/* PROBLEMAS */
 .problem-box {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
 
     background: var(--field-bg);
     border: 1px solid var(--border);
     padding: 12px 15px;
     border-radius: 8px;
     margin-bottom: 10px;
+
+    transition: box-shadow 0.18s ease;
+}
+
+.problem-box:hover {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
 }
 
 .problem-box span:first-of-type {
@@ -99,73 +173,108 @@
     font-size: 16px;
 }
 
-/* BARRA DE COR */
+/* BARRA DE COR (dificuldade) */
 .color-bar {
     width: 6px;
     height: 30px;
     border-radius: 4px;
-    margin-right: 10px;
+    margin-right: 12px;
     flex-shrink: 0;
 }
 
-.green { background: #2ecc71; }
-.yellow { background: #f1c40f; }
-.red { background: #e74c3c; }
+.green { background: var(--success); }
+.yellow { background: var(--difficulty-medium); }
+.red { background: var(--primary); }
 
-/* AC BUTTON (NA ⇄ AC) */
+.dot-easy { background: var(--success); }
+.dot-medium { background: var(--difficulty-medium); }
+.dot-hard { background: var(--primary); }
+
+/* BOTÃO AC (NA ⇄ AC) */
 .ac-btn {
-    width: 70px;
-    height: 32px;
+    min-width: 62px;
+    height: 34px;
 
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 6px;
 
-    border: none;
-    border-radius: 6px;
+    padding: 0 14px;
+    border: 1.5px solid transparent;
+    border-radius: 999px;
 
     cursor: pointer;
 
-    font-size: 13px;
-    font-weight: bold;
-
-    transition: 0.2s;
+    font-size: 12.5px;
+    font-weight: 800;
+    letter-spacing: 0.03em;
 
     margin-left: 10px;
+
+    transition: transform 0.15s ease, filter 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .ac-btn:hover {
-    opacity: 0.9;
+    transform: translateY(-1px);
 }
 
 .na {
-    background: #f87171;
-    color: white;
+    background: var(--card-bg);
+    color: var(--muted);
+    border-color: var(--border);
+}
+.na:hover {
+    border-color: var(--primary);
+    color: var(--primary);
 }
 
 .ac {
-    background: #22c55e;
+    background: var(--success);
     color: white;
+    border-color: var(--success);
+    box-shadow: 0 2px 8px rgba(46, 204, 113, 0.35);
+}
+.ac:hover {
+    filter: brightness(1.06);
 }
 
 /* BOTÃO SOLUÇÃO */
 .solution-btn {
-    background: #3b82f6;
-    color: white;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 
-    padding: 6px 10px;
-    border-radius: 6px;
+    color: var(--text);
+    border: 1px solid var(--text);
 
-    font-size: 15px;
-    font-weight: 600;
+    padding: 8px 15px;
+    border-radius: 999px;
+
+    font-size: 14px;
+    font-weight: 700;
 
     text-decoration: none;
+    white-space: nowrap;
 
     margin-left: 10px;
+
+    transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.solution-btn::after {
+    content: "\2192";
+    font-size: 13px;
+    transition: transform 0.15s ease;
 }
 
 .solution-btn:hover {
-    background: #2563eb;
+    filter: brightness(0.93);
+    transform: translateY(-1px);
+}
+
+.solution-btn:hover::after {
+    transform: translateX(2px);
 }
 
 .problem-title-link {
@@ -181,7 +290,7 @@
 
 .problem-title-link:hover {
     text-decoration: underline;
-    color: #2563eb;
+    color: var(--primary);
 }
 
 .ref-link {
@@ -192,7 +301,7 @@
 
 .ref-link:hover {
     text-decoration: underline;
-    color: #2563eb;
+    color: var(--primary);
 }
 
 #topic-back {
@@ -216,4 +325,51 @@
 #topic-back:hover {
     background: var(--primary);
     color: white;
+}
+
+/* Foco visível (acessibilidade) */
+.status:focus-visible,
+.ac-btn:focus-visible,
+.solution-btn:focus-visible,
+.ref-link:focus-visible,
+.problem-title-link:focus-visible,
+#topic-back:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* Responsivo */
+@media (max-width: 640px) {
+    .bb {
+        padding: 18px;
+        margin: 20px auto;
+    }
+
+    .title {
+        font-size: 2.1rem;
+    }
+
+    .ref-box {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .status {
+        align-self: flex-end;
+    }
+
+    .problem-box {
+        align-items: flex-start;
+    }
+
+    .problem-title-link {
+        flex-basis: 100%;
+        margin-bottom: 8px;
+    }
+
+    .ac-btn,
+    .solution-btn {
+        margin-left: 0;
+        margin-top: 6px;
+    }
 }

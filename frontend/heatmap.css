@@ -1,7 +1,6 @@
 .heatmap {
-    margin-top: 22px;
+    margin-top: 10px;
     padding-top: 18px;
-    border-top: 1px solid var(--border);
 }
 
 .heat-title {

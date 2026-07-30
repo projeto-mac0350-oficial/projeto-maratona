@@ -4,7 +4,9 @@
 
 .admin {
 
-    max-width: 1000px;
+    width: 100%;
+
+    max-width: 1080px;
 
     margin: 0 40px;
 
@@ -19,11 +21,12 @@
 
 .admin h1 {
 
-    color: var(--primary);
+    color: var(--text-strong);
 
     font-size: 3rem;
+    font-family: 'IBM Plex Mono', monospace;
 
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
 
 }
 
@@ -57,11 +60,13 @@
 
     display: flex;
 
-    justify-content: space-between;
+    justify-content: left;
 
     align-items: center;
 
     gap: 1rem;
+
+    margin-bottom: 1.5rem;
 
 }
 
