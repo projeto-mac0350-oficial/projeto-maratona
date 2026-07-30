@@ -4,6 +4,37 @@ Plataforma de estudos para maratona de programação: um backend Flask com
 autenticação por sessão e um frontend com páginas de conteúdo e soluções.
 O backend também serve as páginas do frontend, então tudo roda na mesma origem.
 
+## Funcionalidades 
+
+- Cadastro e autenticação de usuários
+- Login e logout de usuários 
+- Acesso a conteúdos organizados nos níveis: Programação Junior, Programação 1, Programação 2 e Bixecamp 
+- Visualização de conteúdos com problemas, referências e soluções
+- Acesso à página de solução de cada problema
+- Dashboard com heatmap, streak, progresso, problemas resolvidos, referências lidas e metas
+- Criação, visualização e exclusão de metas de cada usuário
+- Painel administrativo para gerenciamento de conteúdo
+- Criação, visualização e exclusão de conteúdos, referências, problemas e soluções pelo administrador
+
+## Tecnologias utilizadas 
+
+### Backend
+- Python
+- Flask
+- SQLite
+- Werkzeug (autenticação e segurança de senhas)
+- Pytest (testes automatizados)
+
+### Frontend
+- HTML
+- CSS
+- JavaScript
+
+### Ferramentas
+- Git
+- GitHub
+- VS Code 
+
 ## Estrutura
 
 ```
@@ -131,13 +162,13 @@ Cada página só inclui esses dois arquivos e coloca `<span id="auth-controls"><
 no cabeçalho; o widget verifica a sessão (`GET /me`), injeta o modal e dispara um
 evento `auth:change` que as páginas usam para mostrar/ocultar a área do usuário.
  
-Na homepage, a área do usuário logado mostra um **mini calendário** do mês
+No dashboard, a área do usuário logado mostra um **mini calendário** do mês
 (`calendar.js`): cada visita autenticada registra o dia (o backend grava em
 `/login` e `/me`, e `GET /activity` devolve os dias do mês + a sequência), os
 dias registrados aparecem marcados, o dia atual destacado e a **sequência** —
 dias seguidos de acesso — logo abaixo. Sem login o calendário não aparece.
 
-No perfil, a seção "Sua atividade" mostra um **heatmap** (`heatmap.js`) no
+No dashboard, a seção "Sua atividade" mostra um **heatmap** (`heatmap.js`) no
 formato clássico: 7 linhas (uma por dia da semana), colunas são semanas
 consecutivas, e o dia de hoje é sempre a última célula da última coluna. Os
 dados vêm de `GET /heatmap`, que conta, por dia, quantos itens de progresso
@@ -146,14 +177,28 @@ quadrado fica cinza sem atividade ou num de três tons de verde, mais escuro
 quanto mais itens foram concluídos naquele dia. O número de semanas exibidas e
 os limites de cada tom são constantes no topo do próprio `heatmap.js`, fáceis
 de ajustar.
- 
-O conteúdo de estudo vem do banco (tabelas `levels`/`topics`/`topic_items`,
-populadas por `SEED_LEVELS`/`SEED_CONTENT` em `app.py`): cada tópico pertence a
+
+No dashboard, na seção "Suas metas" mostra as **metas** (`goals.js`) definidas pelo usuário. 
+Além de listar as metas existentes, é possível criar metas de estudos, definindo um prazo 
+opcional (dia e mês) e deletar metas que foram concluídas. Estas usam as rotas `GET /goals`, 
+`POST /goals` e `DELETE /goals/<goal_id>` para manter o banco de dados atualizado.
+
+O conteúdo de estudo é armazenado nas tabelas `levels`, `topics` e `topic_items` do banco de dados. 
+A tabela `levels` é inicializada por `SEED_LEVELS` em `app.py`, enquanto os tópicos, referências e 
+problemas são armazenados nas tabelas `topics`/`topic_items`. Cada tópico pertence a
 um nível (`level_id`), e `topic.html` lê o `slug` da query string (`/conteudo?topic=<slug>`),
 busca `GET /topics/<slug>` e monta a página. Cada item já traz o `item_key` e o `label`
-usados pelo `progress.js`, então os toggles persistem como nas páginas estáticas.
+usados pelo `progress.js`, permitindo persistir o progresso do usuário.
 Cada problema também traz uma `difficulty` (`easy`/`medium`/`hard`) que vira a
 barra de cor (verde/amarelo/vermelho) ao lado do título.
+
+O painel administrativo é acessível apenas para usuários
+administradores. As páginas `pagina_admin.html`,
+`pagina_admin_novo.html` e `pagina_admin_editar.html` permitem listar
+os conteúdos agrupados por nível, criar novos tópicos, editar
+informações, adicionar e remover referências e problemas, além de
+excluir conteúdos existentes. Todas essas operações são realizadas por
+meio das rotas `/admin/*`.
 
 
 ## Progresso de estudos
