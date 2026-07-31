@@ -48,6 +48,10 @@
     padding: 2rem 0 2rem;
 }
 
+.painel-grid > div {
+    min-width: 0;
+}
+
 /* ======================
    Seções
    ====================== */
@@ -200,9 +204,16 @@ Barras de progresso
    Responsividade
    ====================== */
 
+@media (max-width: 860px) {
+    .painel-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 @media (max-width: 768px) {
 
     .perfil {
+        margin: 0;
         padding: 2rem 1rem;
     }
 
@@ -215,8 +226,14 @@ Barras de progresso
     }
 }
 
-@media (max-width: 860px) {
-    .perfil-grid {
-        grid-template-columns: 1fr;
+@media (max-width: 480px) {
+    .nivel-titulo {
+        width: 56px;
+        font-size: 0.9rem;
+    }
+
+    .nivel-detalhe {
+        margin-left: 20px;
+        padding-left: 8px;
     }
 }

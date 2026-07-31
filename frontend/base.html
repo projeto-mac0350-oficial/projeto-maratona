@@ -35,7 +35,13 @@
 <header>
     <h1><a href="/">MaratonUSP Ensina</a></h1>
 
-    <nav class="barra-navegacao">
+    <button id="menu-toggle" class="menu-toggle" type="button"
+            aria-label="Abrir menu" aria-expanded="false" aria-controls="barra-navegacao">
+        <svg class="icon-open" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z"/></svg>
+        <svg class="icon-close" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
+    </button>
+
+    <nav class="barra-navegacao" id="barra-navegacao">
         <div class="head_botoes">
         
             <div class="nav-dropdown" id="niveis-dropdown">
@@ -87,6 +93,44 @@ themeToggle.addEventListener("click", () => {
 });
 
 refreshThemeLabel();
+
+/* --- Menu hambúrguer (mobile) --------------------------------------------- */
+const menuToggle = document.getElementById("menu-toggle");
+const barraNavegacao = document.getElementById("barra-navegacao");
+
+function setMobileMenu(open) {
+    barraNavegacao.classList.toggle("is-open", open);
+    menuToggle.classList.toggle("is-open", open);
+    menuToggle.setAttribute("aria-expanded", String(open));
+    menuToggle.setAttribute("aria-label", open ? "Fechar menu" : "Abrir menu");
+}
+
+menuToggle.addEventListener("click", (e) => {
+    e.stopPropagation();
+    setMobileMenu(!barraNavegacao.classList.contains("is-open"));
+});
+
+// Fecha o menu mobile ao clicar fora dele
+document.addEventListener("click", (e) => {
+    if (barraNavegacao.classList.contains("is-open") &&
+        !barraNavegacao.contains(e.target) &&
+        e.target !== menuToggle) {
+        setMobileMenu(false);
+    }
+});
+
+// Fecha o menu mobile ao clicar em algum link (exceto o dropdown de níveis)
+barraNavegacao.addEventListener("click", (e) => {
+    const link = e.target.closest("a");
+    if (link) setMobileMenu(false);
+});
+
+// Se a tela for redimensionada para desktop, garante que o menu não fique "preso" aberto
+window.addEventListener("resize", () => {
+    if (window.innerWidth > 860 && barraNavegacao.classList.contains("is-open")) {
+        setMobileMenu(false);
+    }
+});
 
 /* --- Menu "Níveis": busca as opções em /levels e monta o dropdown --------- */
 const niveisToggle = document.getElementById("niveis-toggle");

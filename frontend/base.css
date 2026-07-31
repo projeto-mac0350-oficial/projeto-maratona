@@ -88,6 +88,7 @@ main {
 
 /* --- Header ----------------------------- */
 header {
+    position: relative;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -188,6 +189,43 @@ header h1 a {
     font-size: 0.9rem;
 }
 
+/* --- Menu hambúrguer (mobile) ------------------------------------------- */
+.menu-toggle {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    padding: 0.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    color: var(--text);
+    z-index: 40;
+}
+
+.menu-toggle:hover {
+    background-color: var(--primary-light);
+    color: var(--primary);
+}
+
+.menu-toggle svg {
+    display: block;
+    pointer-events: none;
+}
+
+.menu-toggle .icon-close {
+    display: none;
+}
+
+.menu-toggle.is-open .icon-open {
+    display: none;
+}
+
+.menu-toggle.is-open .icon-close {
+    display: block;
+}
+
+
 /* --- Footer ----------------------------------------------------------------- */
 .site-footer {
     text-align: center;
@@ -200,3 +238,89 @@ header h1 a {
     display: none !important;
 }
 
+/* --- Responsivo ----------------------------------------------------------- */
+@media (max-width: 860px) {
+    header {
+        padding: 0.9rem 1.25rem;
+    }
+
+    .menu-toggle {
+        display: inline-flex;
+        order: 3;
+    }
+
+    .barra-navegacao {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        max-height: 0;
+        overflow: hidden;
+        background-color: var(--card-bg);
+        border-bottom: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        transition: max-height 0.3s ease;
+        z-index: 30;
+    }
+
+    .barra-navegacao.is-open {
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    .head_botoes {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0;
+        padding: 0.5rem 0;
+    }
+
+    .head_botoes .nav-button {
+        width: 100%;
+        text-align: left;
+        border-radius: 0;
+        padding: 0.9rem 1.25rem;
+    }
+
+    .nav-dropdown {
+        width: 100%;
+        display: block;
+    }
+
+    #niveis-toggle {
+        width: 100%;
+        text-align: left;
+        justify-content: space-between;
+    }
+
+    .nav-dropdown-menu {
+        position: static;
+        width: 100%;
+        margin-top: 0;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+        background-color: var(--field-bg);
+    }
+
+    .nav-dropdown-menu a {
+        padding-left: 2rem;
+    }
+
+    #container-auth-controls {
+        width: 100%;
+        padding: 0.4rem 1.25rem;
+    }
+
+    #theme-toggle {
+        width: 100%;
+        justify-content: flex-start;
+        padding: 0.9rem 1.25rem;
+    }
+}
+
+@media (max-width: 420px) {
+    header h1 a {
+        font-size: 1.4rem;
+    }
+}
