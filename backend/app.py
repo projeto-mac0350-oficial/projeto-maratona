@@ -8,7 +8,7 @@ from flask import Flask, jsonify, request, session, render_template, redirect
 from werkzeug.security import check_password_hash, generate_password_hash
 
 DATABASE = "users.db"
-# The static study pages (homepage, content, solutions) live alongside the
+# The frontend pages (homepage, content, solutions) live alongside the
 # backend in ../frontend. Serving them from Flask keeps the pages and the API
 # on the same origin, so the session cookie set at login is sent back on /me.
 FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "..", "frontend")
@@ -49,10 +49,9 @@ def init_db():
                 ALTER TABLE users
                 ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0
             """)
-        # Per-user study progress. The content pages are static, so they supply
-        # the item identity (item_key) and a human label; the backend just stores
-        # the checked/unchecked state per user. kind ("ref" | "problem") lets the
-        # dashboard group items without needing a content data model.
+        # Per-user study progress. The content items supply the item identity
+        # (item_key) and a human label; the backend stores the checked/unchecked
+        # state per user. kind ("ref" | "problem") lets the dashboard group items. 
         db.execute(
             """
             CREATE TABLE IF NOT EXISTS progress (
@@ -96,8 +95,8 @@ def init_db():
             )
             """
         )
-        # Levels group topics into separate lists/pages (e.g. Nível 1, 2, 3).
-        # Seeded from SEED_LEVELS below, same idempotent-upsert pattern as topics.
+        # Levels group topics into separate lists/pages (e.g. Programação Júnior,
+        # Programação 1, Programação 2). Initial levels are inserted from SEED_LEVELS below.
         db.execute(
             """
             CREATE TABLE IF NOT EXISTS levels (
@@ -109,9 +108,8 @@ def init_db():
             """
         )
         # Study content: topics and their items (references to read + problems to
-        # solve). This is course-authored reference data — read-only over the API
-        # and seeded from SEED_CONTENT below, so adding a topic means editing data,
-        # not hand-writing an HTML page.
+        # solve). Topics are managed through the admin panel and stored in the database,
+        # allowing content updates without editing HTML pages.
         db.execute(
             """
             CREATE TABLE IF NOT EXISTS topics (
@@ -205,7 +203,7 @@ def login_required(view):
     return wrapped
 
 def admin_required(view):
-    """Permite acesso apenas para administradores."""
+    """Allow access only to administrators."""
 
     @wraps(view)
     def wrapped(*args, **kwargs):
@@ -255,7 +253,7 @@ def compute_streak(days, today):
 
 @app.get("/")
 def index():
-    """Serve the homepage; other static pages are served by static_folder."""
+    """Serve the homepage; other frontend pages are rendered or served by Flask."""
     return render_template("index.html")
 
 
@@ -531,7 +529,7 @@ def delete_goal(goal_id):
 
 @app.get("/levels")
 def list_levels():
-    """List the levels (e.g. Nível 1, 2, 3) that power the "Níveis" menu."""
+    """List the levels that power the "Níveis" menu."""
     with closing(get_db()) as db:
         rows = db.execute(
             "SELECT slug, title FROM levels ORDER BY position, id"
@@ -732,7 +730,7 @@ def admin_create():
 
         slug = _unique_topic_slug(db, _slugify(title))
 
-        # Cria o tópico
+        # Create the topic
         next_position = db.execute(
             "SELECT COALESCE(MAX(position) + 1, 0) FROM topics"
         ).fetchone()[0]
@@ -746,7 +744,7 @@ def admin_create():
         )
         topic_id = cursor.lastrowid
 
-        # Referências
+        # References
         new_ref_titles = request.form.getlist("new_ref_title")
         new_ref_urls = request.form.getlist("new_ref_url")
 
@@ -766,7 +764,7 @@ def admin_create():
                 (topic_id, ref_slug, new_ref_titles[i], new_ref_urls[i], i),
             )
 
-        # Problemas
+        # Problems
         new_titles = request.form.getlist("new_problem_title")
         new_urls = request.form.getlist("new_problem_url")
         new_difficulties = request.form.getlist("new_problem_difficulty")
@@ -928,7 +926,7 @@ def admin_update(slug):
         ).fetchone()["id"]
 
 
-        # Atualiza tópico
+        # Update topic
         db.execute(
             """
             UPDATE topics
@@ -946,7 +944,7 @@ def admin_update(slug):
         )
 
 
-        # Atualiza problemas
+        # Update problems
         problem_ids = request.form.getlist("problem_id")
         titles = request.form.getlist("problem_title")
         urls = request.form.getlist("problem_url")
@@ -1001,7 +999,7 @@ def admin_update(slug):
 
         for i in range(len(new_titles)):
 
-            # ignora campos vazios
+            # Ignore empty fields
             if not new_titles[i].strip():
                 continue
 
@@ -1009,7 +1007,7 @@ def admin_update(slug):
             problem_slug = new_titles[i].lower().replace(" ", "-")
 
 
-            # pega a próxima posição disponível
+            # Get the next available position
             next_position = db.execute(
                 """
                 SELECT COALESCE(MAX(position) + 1, 0)
@@ -1151,7 +1149,7 @@ def admin_topics():
 @login_required
 @admin_required
 def delete_topic(slug):
-    """Apaga o tópico e tudo que depende dele (itens e soluções)."""
+    """Delete the topic and all its dependencies (items and solutions)."""
 
     with closing(get_db()) as db:
 
