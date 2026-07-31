@@ -250,9 +250,11 @@ de conteúdos, problemas, referências e soluções pelos administradores.
 
 ## Autores 
 
-- Bruno Levi
+- Bruno Rocha Levi
 - Erick Henrique Imai Rodrigues 
 - Guilherme Ryuji Osato 
 - Sara Miyuka Abe
+
+Co-autoria: ChatGPT, Claude Sonnet 5, Claude Opus 4.8
 
 

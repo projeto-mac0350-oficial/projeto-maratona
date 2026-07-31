@@ -3,6 +3,7 @@
     max-width: 1080px;
     margin: 40px auto;
     padding: 25px;
+    box-sizing: border-box;
     background: var(--card-bg);
     border-radius: 12px;
     font-family: Arial, sans-serif;
@@ -26,6 +27,7 @@
     font-size: 17px;
     line-height: 1.6;
     margin-bottom: 30px;
+    overflow-wrap: break-word;
 }
 
 /* Seções */
@@ -97,6 +99,8 @@
 
 .ref-box span {
     font-size: 16px;
+    min-width: 0;
+    overflow-wrap: break-word;
 }
 
 /* BOTÃO STATUS (REFERÊNCIAS) — pílula com indicador em ponto,
@@ -166,6 +170,13 @@
 
 .problem-box:hover {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.07);
+}
+
+.problem-main {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
 }
 
 .problem-box span:first-of-type {
@@ -280,6 +291,7 @@
 .problem-title-link {
     flex: 1;        /* ESSENCIAL */
     min-width: 0;
+    overflow-wrap: break-word;
 }
 
 .problem-title-link,
@@ -362,7 +374,7 @@
         align-items: flex-start;
     }
 
-    .problem-title-link {
+    .problem-main {
         flex-basis: 100%;
         margin-bottom: 8px;
     }

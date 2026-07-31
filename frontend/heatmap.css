@@ -13,6 +13,7 @@
     display: flex;
     gap: 0.4rem;
     align-items: flex-start;
+    min-width: 0;
 }
 
 .heat-weekday-labels {
@@ -33,6 +34,8 @@
     flex-direction: column;
     gap: 4px;
     overflow-x: auto;
+    min-width: 0;
+    max-width: 100%;
 }
 
 .heat-month-labels {
